@@ -352,7 +352,7 @@ export default function App() {
       {/* SIDEBAR */}
       <aside style={{ width: 216, background: INK, minHeight: "100vh", padding: "22px 12px", position: "sticky", top: 0, flexShrink: 0 }}>
         <div style={{ padding: "4px 10px 22px 10px" }}>
-          <div className="disp" style={{ color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "0.01em" }}>ING. CLÍNICA</div>
+          <div className="disp" style={{ color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "0.01em" }}>INGENIERÍA CLÍNICA</div>
           <div style={{ color: "#7FA8B8", fontSize: 11, marginTop: 2 }}>Gestión de Adquisiciones</div>
         </div>
         <nav style={{ display: "flex", flexDirection: "column", gap: 3 }}>
