@@ -1,3 +1,20 @@
+import { db } from './firebaseConfig'; // Tu archivo de configuración de Firebase
+import { doc, deleteDoc } from 'firebase/firestore';
+
+const eliminarEquipo = async (idDocumento) => {
+  try {
+    // 1. Apuntar al documento específico dentro de la colección
+    const documentoRef = doc(db, "equipos", idDocumento);
+    
+    // 2. Ejecutar la orden de eliminación en Firebase
+    await deleteDoc(documentoRef);
+    
+    console.log("¡Documento eliminado con éxito de Firebase!");
+  } catch (error) {
+    console.error("Error al borrar el documento:", error);
+  }
+};
+
 import React, { useState, useMemo, useEffect } from "react";
 import {
   collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc,
