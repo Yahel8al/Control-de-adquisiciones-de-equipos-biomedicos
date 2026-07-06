@@ -24,6 +24,8 @@ const TIPOS = ["Nuevo", "Reposición"];
 const PRIORIDADES = ["Alta", "Media", "Baja"];
 const ESTADOS = ["Pendiente", "En Revisión", "Aprobado", "Rechazado", "Adquirido"];
 const YEARS = [2025, 2026];
+const INITIAL_DATA = [];
+const INITIAL_BUDGET = YEARS.flatMap((y) => AREAS_DEFAULT.map((a) => ({ area: a, anio: y, presupuesto: 0 })));
 
 const INK = "#0B2A3D";
 const INK_2 = "#123B52";
