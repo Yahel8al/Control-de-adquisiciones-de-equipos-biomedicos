@@ -16,16 +16,14 @@ import {
 
 const AREAS_DEFAULT = ["Emergencias", "UCI", "Farmacia Interna", "Quirófano",
   "Imagenología", "Laboratorio Clínico", "Hospitalización",
-  "Consulta Externa", "Cardiología", "Rehabilitación"];
-const RESPONSABLES_DEFAULT = ["Andrea Torres", "Carlos Medina", "Paula Ríos",
-  "Diego Salazar", "Fernanda Ortiz", "Julián Peña", "Camila Vargas", "Mateo Herrera"];
+  "Consulta Externa", "Compras", "Mantenimiento", "Administración", "Otros"];
+const RESPONSABLES_DEFAULT = ["Bqf.Johana Guevara","Lcda.Diana Ramón","Lcda.Marcela Pesantez",
+  "Lcda.Sandra Ortiz","Lcda.Mariela Peñalosa","Lcda.Martha Astudillo","Lcda.Isabel León",
+  "Bqf.Gabriela Romero","Ing.Alan Ochoa","Aux.Paola Ucho"];
 const TIPOS = ["Nuevo", "Reposición"];
 const PRIORIDADES = ["Alta", "Media", "Baja"];
 const ESTADOS = ["Pendiente", "En Revisión", "Aprobado", "Rechazado", "Adquirido"];
-const YEARS = [2024, 2025, 2026];
-
-const INITIAL_DATA = [{"id": "SOL-2025-001", "fecha": "2025-12-02", "anio": 2025, "area": "UCI", "servicio": "UCI", "responsable": "Carlos Medina", "equipo": "Monitor multiparamétrico", "tipo": "Nuevo", "justificacion": "Incremento en la demanda del servicio requiere mayor capacidad", "prioridad": "Alta", "estado": "En Revisión", "valorUnitario": 280000, "cantidad": 1, "total": 280000, "observaciones": ""}];
-const INITIAL_BUDGET = [{"area": "Emergencias", "anio": 2024, "presupuesto": 300000}, {"area": "Emergencias", "anio": 2025, "presupuesto": 150000}, {"area": "Emergencias", "anio": 2026, "presupuesto": 400000}, {"area": "UCI", "anio": 2024, "presupuesto": 80000}, {"area": "UCI", "anio": 2025, "presupuesto": 120000}, {"area": "UCI", "anio": 2026, "presupuesto": 650000}, {"area": "Farmacia Interna", "anio": 2024, "presupuesto": 120000}, {"area": "Farmacia Interna", "anio": 2025, "presupuesto": 300000}, {"area": "Farmacia Interna", "anio": 2026, "presupuesto": 80000}, {"area": "Quirófano", "anio": 2024, "presupuesto": 650000}, {"area": "Quirófano", "anio": 2025, "presupuesto": 200000}, {"area": "Quirófano", "anio": 2026, "presupuesto": 80000}, {"area": "Imagenología", "anio": 2024, "presupuesto": 120000}, {"area": "Imagenología", "anio": 2025, "presupuesto": 400000}, {"area": "Imagenología", "anio": 2026, "presupuesto": 400000}, {"area": "Laboratorio Clínico", "anio": 2024, "presupuesto": 120000}, {"area": "Laboratorio Clínico", "anio": 2025, "presupuesto": 200000}, {"area": "Laboratorio Clínico", "anio": 2026, "presupuesto": 120000}, {"area": "Hospitalización", "anio": 2024, "presupuesto": 650000}, {"area": "Hospitalización", "anio": 2025, "presupuesto": 400000}, {"area": "Hospitalización", "anio": 2026, "presupuesto": 80000}, {"area": "Consulta Externa", "anio": 2024, "presupuesto": 120000}, {"area": "Consulta Externa", "anio": 2025, "presupuesto": 200000}, {"area": "Consulta Externa", "anio": 2026, "presupuesto": 80000}, {"area": "Cardiología", "anio": 2024, "presupuesto": 400000}, {"area": "Cardiología", "anio": 2025, "presupuesto": 80000}, {"area": "Cardiología", "anio": 2026, "presupuesto": 200000}, {"area": "Rehabilitación", "anio": 2024, "presupuesto": 80000}, {"area": "Rehabilitación", "anio": 2025, "presupuesto": 650000}, {"area": "Rehabilitación", "anio": 2026, "presupuesto": 150000}];
+const YEARS = [2025, 2026];
 
 const INK = "#0B2A3D";
 const INK_2 = "#123B52";
