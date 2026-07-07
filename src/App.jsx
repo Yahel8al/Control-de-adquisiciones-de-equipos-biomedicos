@@ -12,6 +12,7 @@ import {
   LayoutDashboard, Database, Wallet, Table2, BookOpen, Plus, X,
   ChevronDown, Activity, TrendingUp, Package, ClipboardCheck,
   AlertTriangle, CheckCircle2, Search, Trash2, SlidersHorizontal, Settings, Save, Cloud, CloudOff,
+  ArrowUp, ArrowDown, ArrowUpDown, Pencil, KeyRound,
 } from "lucide-react";
 
 const AREAS_DEFAULT = ["Emergencias", "UCI", "Farmacia Interna", "Quirófano",
@@ -66,6 +67,7 @@ const fmtUSDk = (n) => {
 };
 const fmtPct = (n) => (n * 100).toFixed(1) + "%";
 const uid = () => Date.now().toString().slice(-6) + Math.floor(Math.random() * 90 + 10);
+const APP_PASSWORD = "1a2b3c";
 
 // --- Persistencia local (funciona en el sitio ya desplegado; en la vista previa de Claude.ai se ignora) ---
 const STORAGE_PREFIX = "acq_equipos_medicos_";
@@ -100,6 +102,11 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [newArea, setNewArea] = useState("");
   const [newResp, setNewResp] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, dir: null });
+  const [authModal, setAuthModal] = useState(null); // { type: "delete"|"edit", id }
+  const [authPass, setAuthPass] = useState("");
+  const [authError, setAuthError] = useState("");
   const emptyForm = {
     fecha: new Date().toISOString().slice(0, 10), area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
     equipo: "", tipo: "Nuevo", justificacion: "", prioridad: "Media", estado: "Pendiente",
@@ -157,12 +164,14 @@ export default function App() {
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
 
-  const addRequest = (e) => {
+  const closeForm = () => { setShowForm(false); setEditingId(null); setForm(emptyForm); };
+
+  const submitForm = (e) => {
     e.preventDefault();
     if (!form.equipo || !form.valorUnitario) { showToast("Completa equipo y valor unitario."); return; }
     const year = new Date(form.fecha).getFullYear();
     const record = {
-      id: "SOL-" + year + "-" + uid(),
+      id: editingId || ("SOL-" + year + "-" + uid()),
       fecha: form.fecha, anio: year, area: form.area, servicio: form.servicio || form.area,
       responsable: form.responsable, equipo: form.equipo, tipo: form.tipo,
       justificacion: form.justificacion || "Sin justificación registrada", prioridad: form.prioridad,
@@ -171,12 +180,15 @@ export default function App() {
     };
     if (cloudMode) {
       setDoc(doc(db, "solicitudes", record.id), record).catch(() => showToast("Error al guardar en la nube."));
+    } else if (editingId) {
+      setData((d) => d.map((r) => (r.id === editingId ? record : r)));
     } else {
       setData((d) => [record, ...d]);
     }
     setForm(emptyForm);
+    setEditingId(null);
     setShowForm(false);
-    showToast("Solicitud " + record.id + " registrada correctamente.");
+    showToast(editingId ? "Solicitud " + record.id + " actualizada." : "Solicitud " + record.id + " registrada correctamente.");
   };
 
   const deleteRequest = (id) => {
@@ -185,6 +197,46 @@ export default function App() {
     } else {
       setData((d) => d.filter((r) => r.id !== id));
     }
+  };
+
+  // --- Protección por clave para eliminar/editar ---
+  const requestDelete = (id) => { setAuthModal({ type: "delete", id }); setAuthPass(""); setAuthError(""); };
+  const requestEdit = (id) => { setAuthModal({ type: "edit", id }); setAuthPass(""); setAuthError(""); };
+  const closeAuthModal = () => { setAuthModal(null); setAuthPass(""); setAuthError(""); };
+
+  const confirmAuth = (e) => {
+    e.preventDefault();
+    if (authPass !== APP_PASSWORD) { setAuthError("Clave incorrecta."); return; }
+    if (authModal.type === "delete") {
+      deleteRequest(authModal.id);
+      showToast("Solicitud eliminada.");
+    } else if (authModal.type === "edit") {
+      const rec = data.find((r) => r.id === authModal.id);
+      if (rec) {
+        setForm({
+          fecha: rec.fecha, area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
+          equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, prioridad: rec.prioridad,
+          estado: rec.estado, valorUnitario: String(rec.valorUnitario), cantidad: String(rec.cantidad),
+          observaciones: rec.observaciones || "",
+        });
+        setEditingId(rec.id);
+        setShowForm(true);
+      }
+    }
+    setAuthModal(null); setAuthPass(""); setAuthError("");
+  };
+
+  // --- Ordenamiento por columna (clic: ascendente → descendente → sin orden) ---
+  const toggleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return { key: null, dir: null };
+    });
+  };
+  const sortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={12} style={{ opacity: 0.4 }} />;
+    return sortConfig.dir === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />;
   };
 
   const updateBudget = (area, anio, value) => {
@@ -270,6 +322,26 @@ export default function App() {
     );
   }, [data, filters]);
 
+  const dbFiltered = useMemo(() => {
+    let arr = data.filter((r) =>
+      (dbFilterEstado === "Todos" || r.estado === dbFilterEstado) &&
+      (r.equipo.toLowerCase().includes(dbSearch.toLowerCase()) ||
+        r.id.toLowerCase().includes(dbSearch.toLowerCase()) ||
+        r.responsable.toLowerCase().includes(dbSearch.toLowerCase()))
+    );
+    if (sortConfig.key) {
+      arr = [...arr].sort((a, b) => {
+        let va = a[sortConfig.key], vb = b[sortConfig.key];
+        if (sortConfig.key === "fecha") { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+        else if (typeof va === "string") { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+        if (va < vb) return sortConfig.dir === "asc" ? -1 : 1;
+        if (va > vb) return sortConfig.dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return arr;
+  }, [data, dbSearch, dbFilterEstado, sortConfig]);
+
   const byArea = useMemo(() => areas.map((a) => ({
     area: a, n: data.filter((r) => r.area === a).length,
     inversion: data.filter((r) => r.area === a).reduce((s, r) => s + r.total, 0),
@@ -342,6 +414,13 @@ export default function App() {
         .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:600; white-space:nowrap; }
         .th { text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:${SLATE_LIGHT}; font-weight:700; padding:10px 12px; border-bottom:1px solid ${BORDER}; }
         .td { padding:11px 12px; font-size:13px; color:${INK}; border-bottom:1px solid #EEF2F4; }
+        .sortbtn { background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+          font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:${SLATE_LIGHT}; font-weight:700; padding:0; }
+        .sortbtn:hover { color:${INK}; }
+        .expand-cell { width:210px; max-width:210px; }
+        .expand-text { display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
+          padding:11px 12px; line-height:1.45; font-size:12.5px; color:${SLATE}; cursor:default; border-radius:6px; }
+        .expand-cell:hover .expand-text { -webkit-line-clamp:unset; display:block; background:#FFF7DE; color:${INK}; position:relative; }
         tr.datarow:hover { background:#FAFBFC; }
         .pulse-dot { width:7px; height:7px; border-radius:50%; background:${TEAL}; box-shadow:0 0 0 0 rgba(18,165,148,0.6); animation:pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(18,165,148,0.5);} 70% { box-shadow:0 0 0 6px rgba(18,165,148,0);} 100% { box-shadow:0 0 0 0 rgba(18,165,148,0);} }
@@ -407,7 +486,7 @@ export default function App() {
             </p>
           </div>
           {(tab === "dashboard" || tab === "database") && (
-            <button className="btn-primary" onClick={() => setShowForm(true)}>
+            <button className="btn-primary" onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(true); }}>
               <Plus size={15} /> Nueva solicitud
             </button>
           )}
@@ -567,28 +646,37 @@ export default function App() {
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
               </select>
               <span style={{ marginLeft: "auto", fontSize: 12.5, color: SLATE_LIGHT }}>
-                {data.filter((r) =>
-                  (dbFilterEstado === "Todos" || r.estado === dbFilterEstado) &&
-                  (r.equipo.toLowerCase().includes(dbSearch.toLowerCase()) || r.id.toLowerCase().includes(dbSearch.toLowerCase()) || r.responsable.toLowerCase().includes(dbSearch.toLowerCase()))
-                ).length} registros
+                {dbFiltered.length} registros
               </span>
             </div>
 
             <div className="card" style={{ overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1300 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1550 }}>
                   <thead>
                     <tr style={{ background: "#FAFBFC" }}>
-                      {["ID", "Fecha", "Área", "Responsable", "Equipo Médico", "Tipo", "Prioridad", "Estado", "V. Unitario", "Cant.", "Inversión", ""].map((h) => (
-                        <th key={h} className="th">{h}</th>
-                      ))}
+                      <th className="th">
+                        <button type="button" className="sortbtn" onClick={() => toggleSort("id")}>ID {sortIcon("id")}</button>
+                      </th>
+                      <th className="th">
+                        <button type="button" className="sortbtn" onClick={() => toggleSort("fecha")}>Fecha {sortIcon("fecha")}</button>
+                      </th>
+                      <th className="th">Área</th>
+                      <th className="th">Responsable</th>
+                      <th className="th">Equipo Médico</th>
+                      <th className="th">Tipo</th>
+                      <th className="th">Prioridad</th>
+                      <th className="th">Estado</th>
+                      <th className="th">V. Unitario</th>
+                      <th className="th">Cant.</th>
+                      <th className="th">Inversión</th>
+                      <th className="th">Justificación</th>
+                      <th className="th">Observaciones</th>
+                      <th className="th"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.filter((r) =>
-                      (dbFilterEstado === "Todos" || r.estado === dbFilterEstado) &&
-                      (r.equipo.toLowerCase().includes(dbSearch.toLowerCase()) || r.id.toLowerCase().includes(dbSearch.toLowerCase()) || r.responsable.toLowerCase().includes(dbSearch.toLowerCase()))
-                    ).map((r) => (
+                    {dbFiltered.map((r) => (
                       <tr key={r.id} className="datarow">
                         <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
                         <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
@@ -606,10 +694,25 @@ export default function App() {
                         <td className="td mono">{fmtUSD(r.valorUnitario)}</td>
                         <td className="td mono">{r.cantidad}</td>
                         <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
+                        <td className="td" style={{ position: "relative", padding: 0 }}>
+                          <div className="expand-cell">
+                            <div className="expand-text">{r.justificacion}</div>
+                          </div>
+                        </td>
+                        <td className="td" style={{ position: "relative", padding: 0 }}>
+                          <div className="expand-cell">
+                            <div className="expand-text">{r.observaciones ? r.observaciones : "—"}</div>
+                          </div>
+                        </td>
                         <td className="td">
-                          <button onClick={() => deleteRequest(r.id)} title="Eliminar" style={{ background: "none", border: "none", cursor: "pointer", color: SLATE_LIGHT }}>
-                            <Trash2 size={14} />
-                          </button>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <button onClick={() => requestEdit(r.id)} title="Editar (requiere clave)" style={{ background: "none", border: "none", cursor: "pointer", color: SLATE_LIGHT }}>
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => requestDelete(r.id)} title="Eliminar (requiere clave)" style={{ background: "none", border: "none", cursor: "pointer", color: SLATE_LIGHT }}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -919,16 +1022,16 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL: NUEVA SOLICITUD */}
+      {/* MODAL: NUEVA SOLICITUD / EDITAR */}
       {showForm && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(11,42,61,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}
-          onClick={() => setShowForm(false)}>
+          onClick={closeForm}>
           <div className="card" style={{ width: 620, maxHeight: "88vh", overflowY: "auto", padding: "22px 26px" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <div className="disp" style={{ fontSize: 16, fontWeight: 700 }}>Nueva solicitud de adquisición</div>
-              <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", cursor: "pointer", color: SLATE_LIGHT }}><X size={18} /></button>
+              <div className="disp" style={{ fontSize: 16, fontWeight: 700 }}>{editingId ? "Editar solicitud " + editingId : "Nueva solicitud de adquisición"}</div>
+              <button onClick={closeForm} style={{ background: "none", border: "none", cursor: "pointer", color: SLATE_LIGHT }}><X size={18} /></button>
             </div>
-            <form onSubmit={addRequest}>
+            <form onSubmit={submitForm}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Fecha</label>
@@ -994,9 +1097,43 @@ export default function App() {
                   Inversión total: <b style={{ color: INK }}>{fmtUSD((Number(form.valorUnitario) || 0) * (Number(form.cantidad) || 0))}</b>
                 </span>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button type="button" className="btn-ghost" onClick={() => setShowForm(false)}>Cancelar</button>
-                  <button type="submit" className="btn-primary"><Plus size={14} /> Guardar solicitud</button>
+                  <button type="button" className="btn-ghost" onClick={closeForm}>Cancelar</button>
+                  <button type="submit" className="btn-primary">
+                    {editingId ? (<><Save size={14} /> Guardar cambios</>) : (<><Plus size={14} /> Guardar solicitud</>)}
+                  </button>
                 </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CLAVE DE SEGURIDAD (editar / eliminar) */}
+      {authModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(11,42,61,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 70, padding: 20 }}
+          onClick={closeAuthModal}>
+          <div className="card" style={{ width: 360, padding: "22px 24px" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <KeyRound size={16} color={INK} />
+              <div className="disp" style={{ fontSize: 15, fontWeight: 700 }}>
+                {authModal.type === "delete" ? "Confirmar eliminación" : "Confirmar edición"}
+              </div>
+            </div>
+            <p style={{ fontSize: 12.5, color: SLATE_LIGHT, margin: "4px 0 14px 0" }}>
+              {authModal.type === "delete"
+                ? "Ingresa la clave para eliminar esta solicitud de forma permanente."
+                : "Ingresa la clave para habilitar la edición de esta solicitud."}
+            </p>
+            <form onSubmit={confirmAuth}>
+              <input type="password" autoFocus className="inp" placeholder="Clave" value={authPass}
+                onChange={(e) => { setAuthPass(e.target.value); setAuthError(""); }} />
+              {authError && <div style={{ color: CORAL, fontSize: 11.5, marginTop: 6 }}>{authError}</div>}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
+                <button type="button" className="btn-ghost" onClick={closeAuthModal}>Cancelar</button>
+                <button type="submit" className="btn-primary"
+                  style={authModal.type === "delete" ? { background: CORAL } : {}}>
+                  {authModal.type === "delete" ? "Eliminar" : "Continuar"}
+                </button>
               </div>
             </form>
           </div>
