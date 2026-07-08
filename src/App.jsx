@@ -108,7 +108,7 @@ export default function App() {
   const [authPass, setAuthPass] = useState("");
   const [authError, setAuthError] = useState("");
   const emptyForm = {
-    id: "", fecha: new Date().toISOString().slice(0, 10), area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
+    id: "", fecha: new Date().toISOString().slice(0, 10), fechaEntrega: "", area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
     equipo: "", tipo: "Nuevo", justificacion: "", prioridad: "Media", estado: "Pendiente",
     valorUnitario: "", cantidad: 1, observaciones: "",
   };
@@ -177,7 +177,7 @@ export default function App() {
     const year = new Date(form.fecha).getFullYear();
     const record = {
       id: editingId || form.id.trim(),
-      fecha: form.fecha, anio: year, area: form.area, servicio: form.servicio || form.area,
+      fecha: form.fecha, fechaEntrega: form.fechaEntrega || "", anio: year, area: form.area, servicio: form.servicio || form.area,
       responsable: form.responsable, equipo: form.equipo, tipo: form.tipo,
       justificacion: form.justificacion || "Sin justificación registrada", prioridad: form.prioridad,
       estado: form.estado, valorUnitario: Number(form.valorUnitario), cantidad: Number(form.cantidad) || 1,
@@ -224,7 +224,7 @@ export default function App() {
       const rec = data.find((r) => r.id === authModal.id);
       if (rec) {
         setForm({
-          id: rec.id, fecha: rec.fecha, area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
+          id: rec.id, fecha: rec.fecha, fechaEntrega: rec.fechaEntrega || "", area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
           equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, prioridad: rec.prioridad,
           estado: rec.estado, valorUnitario: String(rec.valorUnitario), cantidad: String(rec.cantidad),
           observaciones: rec.observaciones || "",
@@ -343,7 +343,10 @@ export default function App() {
     if (sortConfig.key) {
       arr = [...arr].sort((a, b) => {
         let va = a[sortConfig.key], vb = b[sortConfig.key];
-        if (sortConfig.key === "fecha") { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+        if (sortConfig.key === "fecha" || sortConfig.key === "fechaEntrega") {
+          va = va ? new Date(va).getTime() : -Infinity;
+          vb = vb ? new Date(vb).getTime() : -Infinity;
+        }
         else if (typeof va === "string") { va = va.toLowerCase(); vb = vb.toLowerCase(); }
         if (va < vb) return sortConfig.dir === "asc" ? -1 : 1;
         if (va > vb) return sortConfig.dir === "asc" ? 1 : -1;
@@ -663,14 +666,17 @@ export default function App() {
 
             <div className="card" style={{ overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1680 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1820 }}>
                   <thead>
                     <tr style={{ background: "#FAFBFC" }}>
                       <th className="th">
                         <button type="button" className="sortbtn" onClick={() => toggleSort("id")}>ID {sortIcon("id")}</button>
                       </th>
                       <th className="th">
-                        <button type="button" className="sortbtn" onClick={() => toggleSort("fecha")}>Fecha {sortIcon("fecha")}</button>
+                        <button type="button" className="sortbtn" onClick={() => toggleSort("fecha")}>Fecha Sol. {sortIcon("fecha")}</button>
+                      </th>
+                      <th className="th">
+                        <button type="button" className="sortbtn" onClick={() => toggleSort("fechaEntrega")}>Fecha Entrega {sortIcon("fechaEntrega")}</button>
                       </th>
                       <th className="th">Área</th>
                       <th className="th">Servicio</th>
@@ -692,6 +698,7 @@ export default function App() {
                       <tr key={r.id} className="datarow">
                         <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
                         <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
+                        <td className="td">{r.fechaEntrega ? new Date(r.fechaEntrega + "T00:00:00").toLocaleDateString("es-EC") : <span style={{ color: "#D8DFE4" }}>—</span>}</td>
                         <td className="td">{r.area}</td>
                         <td className="td">{r.servicio}</td>
                         <td className="td">{r.responsable}</td>
@@ -984,6 +991,7 @@ export default function App() {
                 "Haz clic en 'Nueva solicitud' desde el Dashboard o la Base de Datos.",
                 "Completa los campos: equipo, área, responsable, tipo, prioridad, estado y valores.",
                 "La inversión total se calcula automáticamente (valor unitario × cantidad).",
+                "Hay dos fechas: 'Fecha de solicitud' (cuándo se registró) y 'Fecha de entrega / actualización de estado' (cuándo se entregó el equipo o cambió su estado). Esta segunda es opcional.",
                 "Al guardar, todos los KPIs, gráficos y pivotes se actualizan al instante.",
               ]},
               { t: "3. Uso de filtros", icon: SlidersHorizontal, items: [
@@ -1055,8 +1063,12 @@ export default function App() {
                     onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Fecha</label>
+                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Fecha de solicitud</label>
                   <input type="date" className="inp" value={form.fecha} onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Fecha de entrega / actualización de estado</label>
+                  <input type="date" className="inp" value={form.fechaEntrega} onChange={(e) => setForm((f) => ({ ...f, fechaEntrega: e.target.value }))} />
                 </div>
                 <div>
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Área</label>
