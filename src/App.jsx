@@ -108,7 +108,7 @@ export default function App() {
   const [authPass, setAuthPass] = useState("");
   const [authError, setAuthError] = useState("");
   const emptyForm = {
-    fecha: new Date().toISOString().slice(0, 10), area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
+    id: "", fecha: new Date().toISOString().slice(0, 10), area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
     equipo: "", tipo: "Nuevo", justificacion: "", prioridad: "Media", estado: "Pendiente",
     valorUnitario: "", cantidad: 1, observaciones: "",
   };
@@ -169,9 +169,14 @@ export default function App() {
   const submitForm = (e) => {
     e.preventDefault();
     if (!form.equipo || !form.valorUnitario) { showToast("Completa equipo y valor unitario."); return; }
+    if (!editingId) {
+      const idTrim = form.id.trim();
+      if (!idTrim) { showToast("Ingresa el ID de la solicitud."); return; }
+      if (data.some((r) => r.id === idTrim)) { showToast("Ese ID ya existe. Usa uno diferente."); return; }
+    }
     const year = new Date(form.fecha).getFullYear();
     const record = {
-      id: editingId || ("SOL-" + year + "-" + uid()),
+      id: editingId || form.id.trim(),
       fecha: form.fecha, anio: year, area: form.area, servicio: form.servicio || form.area,
       responsable: form.responsable, equipo: form.equipo, tipo: form.tipo,
       justificacion: form.justificacion || "Sin justificación registrada", prioridad: form.prioridad,
@@ -199,7 +204,8 @@ export default function App() {
     }
   };
 
-  // --- Protección por clave para eliminar/editar ---
+  // --- Protección por clave para crear/editar/eliminar ---
+  const requestCreate = () => { setAuthModal({ type: "create" }); setAuthPass(""); setAuthError(""); };
   const requestDelete = (id) => { setAuthModal({ type: "delete", id }); setAuthPass(""); setAuthError(""); };
   const requestEdit = (id) => { setAuthModal({ type: "edit", id }); setAuthPass(""); setAuthError(""); };
   const closeAuthModal = () => { setAuthModal(null); setAuthPass(""); setAuthError(""); };
@@ -207,14 +213,18 @@ export default function App() {
   const confirmAuth = (e) => {
     e.preventDefault();
     if (authPass !== APP_PASSWORD) { setAuthError("Clave incorrecta."); return; }
-    if (authModal.type === "delete") {
+    if (authModal.type === "create") {
+      setEditingId(null);
+      setForm(emptyForm);
+      setShowForm(true);
+    } else if (authModal.type === "delete") {
       deleteRequest(authModal.id);
       showToast("Solicitud eliminada.");
     } else if (authModal.type === "edit") {
       const rec = data.find((r) => r.id === authModal.id);
       if (rec) {
         setForm({
-          fecha: rec.fecha, area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
+          id: rec.id, fecha: rec.fecha, area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
           equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, prioridad: rec.prioridad,
           estado: rec.estado, valorUnitario: String(rec.valorUnitario), cantidad: String(rec.cantidad),
           observaciones: rec.observaciones || "",
@@ -486,7 +496,7 @@ export default function App() {
             </p>
           </div>
           {(tab === "dashboard" || tab === "database") && (
-            <button className="btn-primary" onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(true); }}>
+            <button className="btn-primary" onClick={requestCreate}>
               <Plus size={15} /> Nueva solicitud
             </button>
           )}
@@ -1033,6 +1043,14 @@ export default function App() {
             </div>
             <form onSubmit={submitForm}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>
+                    ID de la solicitud {editingId ? "" : "(tú lo defines, debe ser único)"}
+                  </label>
+                  <input className="inp mono" placeholder="Ej. SOL-2026-001" value={form.id} disabled={!!editingId}
+                    style={editingId ? { background: "#F3F6F7", color: SLATE_LIGHT, cursor: "not-allowed" } : {}}
+                    onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))} />
+                </div>
                 <div>
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Fecha</label>
                   <input type="date" className="inp" value={form.fecha} onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value }))} />
@@ -1116,12 +1134,14 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <KeyRound size={16} color={INK} />
               <div className="disp" style={{ fontSize: 15, fontWeight: 700 }}>
-                {authModal.type === "delete" ? "Confirmar eliminación" : "Confirmar edición"}
+                {authModal.type === "delete" ? "Confirmar eliminación" : authModal.type === "create" ? "Confirmar nueva solicitud" : "Confirmar edición"}
               </div>
             </div>
             <p style={{ fontSize: 12.5, color: SLATE_LIGHT, margin: "4px 0 14px 0" }}>
               {authModal.type === "delete"
                 ? "Ingresa la clave para eliminar esta solicitud de forma permanente."
+                : authModal.type === "create"
+                ? "Ingresa la clave para registrar una nueva solicitud."
                 : "Ingresa la clave para habilitar la edición de esta solicitud."}
             </p>
             <form onSubmit={confirmAuth}>
