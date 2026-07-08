@@ -337,6 +337,7 @@ export default function App() {
       (dbFilterEstado === "Todos" || r.estado === dbFilterEstado) &&
       (r.equipo.toLowerCase().includes(dbSearch.toLowerCase()) ||
         r.id.toLowerCase().includes(dbSearch.toLowerCase()) ||
+        (r.servicio || "").toLowerCase().includes(dbSearch.toLowerCase()) ||
         r.responsable.toLowerCase().includes(dbSearch.toLowerCase()))
     );
     if (sortConfig.key) {
@@ -648,7 +649,7 @@ export default function App() {
             <div className="card" style={{ padding: "12px 16px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
                 <Search size={14} color={SLATE_LIGHT} style={{ position: "absolute", left: 10, top: 10 }} />
-                <input className="inp" style={{ paddingLeft: 30 }} placeholder="Buscar por equipo, ID o responsable..."
+                <input className="inp" style={{ paddingLeft: 30 }} placeholder="Buscar por equipo, servicio, ID o responsable..."
                   value={dbSearch} onChange={(e) => setDbSearch(e.target.value)} />
               </div>
               <select className="sel" value={dbFilterEstado} onChange={(e) => setDbFilterEstado(e.target.value)}>
@@ -662,7 +663,7 @@ export default function App() {
 
             <div className="card" style={{ overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1550 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1680 }}>
                   <thead>
                     <tr style={{ background: "#FAFBFC" }}>
                       <th className="th">
@@ -672,6 +673,7 @@ export default function App() {
                         <button type="button" className="sortbtn" onClick={() => toggleSort("fecha")}>Fecha {sortIcon("fecha")}</button>
                       </th>
                       <th className="th">Área</th>
+                      <th className="th">Servicio</th>
                       <th className="th">Responsable</th>
                       <th className="th">Equipo Médico</th>
                       <th className="th">Tipo</th>
@@ -691,6 +693,7 @@ export default function App() {
                         <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
                         <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
                         <td className="td">{r.area}</td>
+                        <td className="td">{r.servicio}</td>
                         <td className="td">{r.responsable}</td>
                         <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
                         <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
