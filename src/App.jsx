@@ -598,7 +598,7 @@ export default function App() {
                     <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}>
                       <thead>
                         <tr style={{ background: "#FAFBFC" }}>
-                          {["ID", "Fecha Sol.", "Área", "Servicio", "Responsable", "Equipo Médico", "Tipo", "Prioridad", "Estado", "V. Unitario", "Cant.", "Inversión"].map((h) => (
+                          {["ID", "Fecha Sol.", "Área", "Responsable", "Equipo Médico", "Cant.", "Inversión"].map((h) => (
                             <th key={h} className="th">{h}</th>
                           ))}
                         </tr>
