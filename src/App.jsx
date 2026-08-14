@@ -609,18 +609,8 @@ export default function App() {
                             <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
                             <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
                             <td className="td">{r.area}</td>
-                            <td className="td">{r.servicio}</td>
                             <td className="td">{r.responsable}</td>
                             <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
-                            <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
-                            <td className="td"><span className="badge" style={{ background: PRIORITY_STYLE[r.prioridad].bg, color: PRIORITY_STYLE[r.prioridad].text }}>{r.prioridad}</span></td>
-                            <td className="td">
-                              <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
-                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_STYLE[r.estado].dot }}></span>
-                                {r.estado}
-                              </span>
-                            </td>
-                            <td className="td mono">{fmtUSD(r.valorUnitario)}</td>
                             <td className="td mono">{r.cantidad}</td>
                             <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
                           </tr>
