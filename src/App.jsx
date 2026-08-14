@@ -717,7 +717,7 @@ export default function App() {
                             className="td mono"
                             style={{
                               padding: "7px 6px",
-                              textAlign: "center",
+                              textAlign: "left",
                             }}
                           >
                             {r.cantidad}
