@@ -588,46 +588,159 @@ export default function App() {
 
             {/* LISTA DESPLEGABLE DE SOLICITUDES FILTRADAS */}
             {showFilteredList && (
-              <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
-                {filtered.length === 0 ? (
-                  <div style={{ padding: "20px 18px", fontSize: 13, color: SLATE_LIGHT, textAlign: "center" }}>
-                    Ninguna solicitud coincide con los filtros seleccionados.
-                  </div>
-                ) : (
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}>
-                      <thead>
-                        <tr style={{ background: "#FAFBFC" }}>
-                          {["ID", "Fecha Sol.", "Área", "Responsable", "Equipo Médico", "Estado", "Cant.", "Inversión"].map((h) => (
-                            <th key={h} className="th">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((r) => (
-                          <tr key={r.id} className="datarow">
-                            <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
-                            <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
-                            <td className="td">{r.area}</td>
-                            <td className="td">{r.responsable}</td>
-                            <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
-                            <td className="td">
-                              <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
-                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_STYLE[r.estado].dot }}></span>
-                                {r.estado}
-                              </span>
-                            </td>
-                            <td className="td mono">{r.cantidad}</td>
-                            <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
-                          </tr>
+            <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
+              {filtered.length === 0 ? (
+                <div
+                  style={{
+                    padding: "20px 18px",
+                    fontSize: 13,
+                    color: SLATE_LIGHT,
+                    textAlign: "center",
+                  }}
+                >
+                  Ninguna solicitud coincide con los filtros seleccionados.
+                </div>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      minWidth: 900,
+                      tableLayout: "fixed",
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ background: "#FAFBFC" }}>
+                        {[
+                          ["ID", 90],
+                          ["Fecha Sol.", 90],
+                          ["Área", 110],
+                          ["Responsable", 140],
+                          ["Equipo Médico", 180],
+                          ["Estado", 120],
+                          ["Cant.", 60],
+                          ["Inversión", 100],
+                        ].map(([h, width]) => (
+                          <th
+                            key={h}
+                            className="th"
+                            style={{
+                              width,
+                              padding: "8px 6px",
+                              whiteSpace: "nowrap",
+                              fontSize: 11,
+                            }}
+                          >
+                            {h}
+                          </th>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
+                      </tr>
+                    </thead>
 
+                    <tbody>
+                      {filtered.map((r) => (
+                        <tr key={r.id} className="datarow">
+                          <td
+                            className="td mono"
+                            style={{
+                              fontSize: 11.5,
+                              color: SLATE,
+                              padding: "7px 6px",
+                            }}
+                          >
+                            {r.id}
+                          </td>
+
+                          <td className="td" style={{ padding: "7px 6px" }}>
+                            {new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}
+                          </td>
+
+                          <td
+                            className="td"
+                            style={{
+                              padding: "7px 6px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {r.area}
+                          </td>
+
+                          <td
+                            className="td"
+                            style={{
+                              padding: "7px 6px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {r.responsable}
+                          </td>
+
+                          <td
+                            className="td"
+                            style={{
+                              padding: "7px 6px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                            title={r.equipo}
+                          >
+                            {r.equipo}
+                          </td>
+
+                          <td className="td" style={{ padding: "7px 6px" }}>
+                            <span
+                              className="badge"
+                              style={{
+                                background: STATUS_STYLE[r.estado].bg,
+                                color: STATUS_STYLE[r.estado].text,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  background: STATUS_STYLE[r.estado].dot,
+                                }}
+                              />
+                              {r.estado}
+                            </span>
+                          </td>
+
+                          <td
+                            className="td mono"
+                            style={{
+                              padding: "7px 6px",
+                              textAlign: "center",
+                            }}
+                          >
+                            {r.cantidad}
+                          </td>
+
+                          <td
+                            className="td mono"
+                            style={{
+                              padding: "7px 6px",
+                              fontWeight: 700,
+                              textAlign: "right",
+                            }}
+                          >
+                            {fmtUSD(r.total)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
             {/* CHARTS GRID */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div className="card" style={{ padding: "16px 18px" }}>
