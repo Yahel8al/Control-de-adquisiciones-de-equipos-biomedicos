@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import {
   LayoutDashboard, Database, Wallet, Table2, BookOpen, Plus, X,
-  ChevronDown, Activity, TrendingUp, Package, ClipboardCheck,
+  ChevronDown, ChevronUp, Activity, TrendingUp, Package, ClipboardCheck,
   AlertTriangle, CheckCircle2, Search, Trash2, SlidersHorizontal, Settings, Save, Cloud, CloudOff,
   ArrowUp, ArrowDown, ArrowUpDown, Pencil, KeyRound,
 } from "lucide-react";
@@ -95,7 +95,8 @@ export default function App() {
   const [budget, setBudget] = useState(() => (cloudMode ? [] : loadLocal("budget", INITIAL_BUDGET)));
   const [areas, setAreas] = useState(() => (cloudMode ? [] : loadLocal("areas", AREAS_DEFAULT)));
   const [responsables, setResponsables] = useState(() => (cloudMode ? [] : loadLocal("responsables", RESPONSABLES_DEFAULT)));
-  const [filters, setFilters] = useState({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos" });
+  const [filters, setFilters] = useState({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" });
+  const [showFilteredList, setShowFilteredList] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [dbSearch, setDbSearch] = useState("");
   const [dbFilterEstado, setDbFilterEstado] = useState("Todos");
@@ -323,12 +324,22 @@ export default function App() {
     };
   }, [data, budget]);
 
+  const matchesValorRango = (r, rango) => {
+    if (rango === "Todos") return true;
+    const v = r.valorUnitario;
+    if (rango === "bajo") return v < 400;
+    if (rango === "medio") return v >= 400 && v <= 2000;
+    if (rango === "alto") return v > 2000;
+    return true;
+  };
+
   const filtered = useMemo(() => {
     return data.filter((r) =>
       (filters.area === "Todos" || r.area === filters.area) &&
       (filters.estado === "Todos" || r.estado === filters.estado) &&
       (filters.responsable === "Todos" || r.responsable === filters.responsable) &&
-      (filters.anio === "Todos" || r.anio === Number(filters.anio))
+      (filters.anio === "Todos" || r.anio === Number(filters.anio)) &&
+      matchesValorRango(r, filters.valorRango)
     );
   }, [data, filters]);
 
@@ -551,16 +562,75 @@ export default function App() {
                   </select>
                 </div>
               ))}
-              {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos") && (
-                <button className="btn-ghost" onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos" })}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, color: SLATE_LIGHT }}>Valor de compra</span>
+                <select className="sel" value={filters.valorRango} onChange={(e) => setFilters((s) => ({ ...s, valorRango: e.target.value }))}>
+                  <option value="Todos">Todos</option>
+                  <option value="bajo">Bajo ($0 – $400)</option>
+                  <option value="medio">Medio ($400 – $2,000)</option>
+                  <option value="alto">Alto (más de $2,000)</option>
+                </select>
+              </div>
+              {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos" || filters.valorRango !== "Todos") && (
+                <button className="btn-ghost" onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
                   <X size={13} /> Limpiar
                 </button>
               )}
-              <div style={{ marginLeft: "auto", display: "flex", gap: 18, fontSize: 12.5 }}>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 18, fontSize: 12.5 }}>
                 <span style={{ color: SLATE_LIGHT }}>Resultado: <b className="mono" style={{ color: INK }}>{filtered.length}</b> solicitudes</span>
                 <span style={{ color: SLATE_LIGHT }}>Inversión: <b className="mono" style={{ color: INK }}>{fmtUSD(filtered.reduce((s, r) => s + r.total, 0))}</b></span>
+                <button className="btn-ghost" onClick={() => setShowFilteredList((v) => !v)}>
+                  {showFilteredList ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  {showFilteredList ? "Ocultar solicitudes" : "Ver solicitudes"}
+                </button>
               </div>
             </div>
+
+            {/* LISTA DESPLEGABLE DE SOLICITUDES FILTRADAS */}
+            {showFilteredList && (
+              <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
+                {filtered.length === 0 ? (
+                  <div style={{ padding: "20px 18px", fontSize: 13, color: SLATE_LIGHT, textAlign: "center" }}>
+                    Ninguna solicitud coincide con los filtros seleccionados.
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}>
+                      <thead>
+                        <tr style={{ background: "#FAFBFC" }}>
+                          {["ID", "Fecha Sol.", "Área", "Servicio", "Responsable", "Equipo Médico", "Tipo", "Prioridad", "Estado", "V. Unitario", "Cant.", "Inversión"].map((h) => (
+                            <th key={h} className="th">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((r) => (
+                          <tr key={r.id} className="datarow">
+                            <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
+                            <td className="td">{new Date(r.fecha + "T00:00:00").toLocaleDateString("es-EC")}</td>
+                            <td className="td">{r.area}</td>
+                            <td className="td">{r.servicio}</td>
+                            <td className="td">{r.responsable}</td>
+                            <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
+                            <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
+                            <td className="td"><span className="badge" style={{ background: PRIORITY_STYLE[r.prioridad].bg, color: PRIORITY_STYLE[r.prioridad].text }}>{r.prioridad}</span></td>
+                            <td className="td">
+                              <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_STYLE[r.estado].dot }}></span>
+                                {r.estado}
+                              </span>
+                            </td>
+                            <td className="td mono">{fmtUSD(r.valorUnitario)}</td>
+                            <td className="td mono">{r.cantidad}</td>
+                            <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* CHARTS GRID */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
