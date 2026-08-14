@@ -598,7 +598,7 @@ export default function App() {
                     <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}>
                       <thead>
                         <tr style={{ background: "#FAFBFC" }}>
-                          {["ID", "Fecha Sol.", "Área", "Responsable", "Equipo Médico", "Cant.", "Inversión"].map((h) => (
+                          {["ID", "Fecha Sol.", "Área", "Responsable", "Equipo Médico", "Estado", "Cant.", "Inversión"].map((h) => (
                             <th key={h} className="th">{h}</th>
                           ))}
                         </tr>
@@ -611,6 +611,12 @@ export default function App() {
                             <td className="td">{r.area}</td>
                             <td className="td">{r.responsable}</td>
                             <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
+                            <td className="td">
+                              <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_STYLE[r.estado].dot }}></span>
+                                {r.estado}
+                              </span>
+                            </td>
                             <td className="td mono">{r.cantidad}</td>
                             <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
                           </tr>
