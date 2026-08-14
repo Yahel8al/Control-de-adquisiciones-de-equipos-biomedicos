@@ -639,7 +639,13 @@ export default function App() {
                     </thead>
 
                     <tbody>
-                      {filtered.map((r) => (
+                      {[...filtered]
+                      .sort((a, b) => {
+                        const numA = parseInt(a.id.split("-").pop(), 10);
+                        const numB = parseInt(b.id.split("-").pop(), 10);
+                        return numB - numA;
+                      })
+                      .map((r) => (
                         <tr key={r.id} className="datarow">
                           <td
                             className="td mono"
