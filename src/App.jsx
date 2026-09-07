@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Database, Wallet, Table2, BookOpen, Plus, X,
   ChevronDown, ChevronUp, Activity, TrendingUp, Package, ClipboardCheck,
   AlertTriangle, CheckCircle2, Search, Trash2, SlidersHorizontal, Settings, Save, Cloud, CloudOff,
-  ArrowUp, ArrowDown, ArrowUpDown, Pencil, KeyRound,
+  ArrowUp, ArrowDown, ArrowUpDown, Pencil, KeyRound, Download, FileDown,
 } from "lucide-react";
 
 const AREAS_DEFAULT = ["Emergencias", "UCI", "Farmacia Interna", "Quirófano",
@@ -23,10 +23,46 @@ const RESPONSABLES_DEFAULT = ["Bqf.Johana Guevara","Lcda.Diana Ramón","Lcda.Mar
   "Bqf.Gabriela Romero","Ing.Alan Ochoa","Aux.Paola Ucho"];
 const TIPOS = ["Nuevo", "Reposición"];
 const PRIORIDADES = ["Alta", "Media", "Baja"];
+const CRITICIDADES = ["Crítica", "Alta", "Media", "Baja"];
 const ESTADOS = ["Pendiente", "En Revisión", "Aprobado", "Rechazado", "Adquirido"];
 const YEARS = [2025, 2026];
-const INITIAL_DATA = [];
-const INITIAL_BUDGET = YEARS.flatMap((y) => AREAS_DEFAULT.map((a) => ({ area: a, anio: y, presupuesto: 0 })));
+// Datos demostrativos iniciales para presentación administrativa. Se pueden editar/eliminar desde Base de Datos.
+const DEMO_ROWS = [
+["SOL-2026-001","2026-01-08","2026-02-12","UCI","UCI","Bqf.Johana Guevara","Ventilador mecánico","Nuevo","Crítica","Alta","Adquirido",28500,4,"Reposición de parque crítico por vida útil","Recepción e instalación completadas."],
+["SOL-2026-002","2026-01-12","2026-03-02","Emergencias","Emergencias","Lcda.Diana Ramón","Monitor multiparamétrico","Nuevo","Alta","Alta","Adquirido",6200,8,"Ampliación de capacidad de atención",""],
+["SOL-2026-003","2026-01-16","","Quirófano","Quirófano","Lcda.Marcela Pesantez","Máquina de anestesia","Nuevo","Crítica","Alta","Aprobado",32500,2,"Modernización de quirófanos","Pendiente coordinación de entrega."],
+["SOL-2026-004","2026-01-21","","Imagenología","Imagenología","Ing.Alan Ochoa","Ecógrafo portátil","Nuevo","Alta","Alta","En Revisión",18400,3,"Cobertura de áreas críticas","En evaluación técnica."],
+["SOL-2026-005","2026-01-27","","Laboratorio Clínico","Laboratorio Clínico","Bqf.Gabriela Romero","Analizador hematológico","Reposición","Alta","Media","Aprobado",21800,2,"Reemplazo por obsolescencia",""],
+["SOL-2026-006","2026-02-03","","Hospitalización","Hospitalización","Lcda.Sandra Ortiz","Bomba de infusión","Reposición","Alta","Alta","Adquirido",1450,20,"Sustituir equipos antiguos e incrementar disponibilidad",""],
+["SOL-2026-007","2026-02-10","","UCI","UCI","Lcda.Mariela Peñalosa","Monitor de signos vitales","Reposición","Alta","Media","En Revisión",5800,6,"Sustitución de equipos fuera de vida útil",""],
+["SOL-2026-008","2026-02-18","","Emergencias","Emergencias","Lcda.Martha Astudillo","Desfibrilador bifásico","Reposición","Crítica","Alta","Pendiente",12400,3,"Garantizar disponibilidad para respuesta inmediata","Solicitud prioritaria."],
+["SOL-2026-009","2026-02-25","","Farmacia Interna","Farmacia Interna","Lcda.Isabel León","Refrigerador para medicamentos","Nuevo","Alta","Media","Aprobado",6900,2,"Ampliación de capacidad de almacenamiento",""],
+["SOL-2026-010","2026-03-04","","Quirófano","Quirófano","Lcda.Marcela Pesantez","Lámpara cialítica","Reposición","Alta","Media","En Revisión",9800,4,"Reemplazo por deterioro",""],
+["SOL-2026-011","2026-03-11","","Laboratorio Clínico","Laboratorio Clínico","Bqf.Gabriela Romero","Centrífuga de laboratorio","Reposición","Media","Media","Adquirido",3600,3,"Renovación de equipos de apoyo",""],
+["SOL-2026-012","2026-03-19","","Imagenología","Imagenología","Ing.Alan Ochoa","Equipo de rayos X digital","Nuevo","Crítica","Alta","Pendiente",142000,1,"Fortalecer capacidad diagnóstica institucional","Inversión estratégica."],
+["SOL-2026-013","2026-03-28","","Hospitalización","Hospitalización","Lcda.Sandra Ortiz","Cama hospitalaria eléctrica","Reposición","Media","Media","Aprobado",4200,12,"Reemplazo de camas con desgaste",""],
+["SOL-2026-014","2026-04-05","","Consulta Externa","Consulta Externa","Lcda.Diana Ramón","Electrocardiógrafo","Nuevo","Media","Baja","Adquirido",2800,4,"Ampliación de cartera de servicios",""],
+["SOL-2026-015","2026-04-12","","UCI","UCI","Lcda.Mariela Peñalosa","Electrocardiógrafo","Reposición","Alta","Media","Pendiente",5200,2,"Sustitución de equipos obsoletos",""],
+["SOL-2026-016","2026-04-20","","Emergencias","Emergencias","Lcda.Diana Ramón","Camilla de transporte","Reposición","Media","Media","En Revisión",3100,10,"Renovación de parque de transporte",""],
+["SOL-2025-001","2025-02-10","2025-03-15","UCI","UCI","Bqf.Johana Guevara","Ventilador mecánico","Reposición","Crítica","Alta","Adquirido",26500,3,"Reposición de equipos antiguos",""],
+["SOL-2025-002","2025-03-06","2025-04-02","Imagenología","Imagenología","Ing.Alan Ochoa","Ecógrafo estacionario","Nuevo","Alta","Alta","Adquirido",52000,2,"Fortalecimiento diagnóstico",""],
+["SOL-2025-003","2025-04-18","2025-05-22","Laboratorio Clínico","Laboratorio Clínico","Bqf.Gabriela Romero","Analizador bioquímico","Nuevo","Alta","Alta","Adquirido",68000,1,"Incremento de capacidad diagnóstica",""],
+["SOL-2025-004","2025-05-08","","Quirófano","Quirófano","Lcda.Marcela Pesantez","Mesa quirúrgica eléctrica","Reposición","Alta","Media","Aprobado",17500,3,"Reemplazo de equipos antiguos",""],
+["SOL-2025-005","2025-06-02","","Hospitalización","Hospitalización","Lcda.Sandra Ortiz","Bomba de infusión","Reposición","Alta","Media","Adquirido",1350,15,"Renovación del parque de bombas",""],
+["SOL-2025-006","2025-07-14","","Emergencias","Emergencias","Lcda.Martha Astudillo","Monitor multiparamétrico","Nuevo","Alta","Alta","Aprobado",6100,5,"Ampliación de capacidad",""],
+];
+const INITIAL_DATA = DEMO_ROWS.map(([id,fecha,fechaEntrega,area,servicio,responsable,equipo,tipo,criticidad,prioridad,estado,valorUnitario,cantidad,justificacion,observaciones]) => ({
+  id, fecha, fechaEntrega, anio:Number(fecha.slice(0,4)), area, servicio, responsable, equipo, tipo, criticidad, prioridad, estado, valorUnitario, cantidad, total:valorUnitario*cantidad, justificacion, observaciones,
+}));
+const INITIAL_BUDGET = [
+  {area:"UCI",anio:2025,presupuesto:145000},{area:"UCI",anio:2026,presupuesto:210000},
+  {area:"Emergencias",anio:2025,presupuesto:105000},{area:"Emergencias",anio:2026,presupuesto:120000},
+  {area:"Quirófano",anio:2025,presupuesto:95000},{area:"Quirófano",anio:2026,presupuesto:125000},
+  {area:"Imagenología",anio:2025,presupuesto:150000},{area:"Imagenología",anio:2026,presupuesto:190000},
+  {area:"Laboratorio Clínico",anio:2025,presupuesto:115000},{area:"Laboratorio Clínico",anio:2026,presupuesto:105000},
+  {area:"Hospitalización",anio:2025,presupuesto:95000},{area:"Hospitalización",anio:2026,presupuesto:115000},
+  ...AREAS_DEFAULT.filter(a=>!["UCI","Emergencias","Quirófano","Imagenología","Laboratorio Clínico","Hospitalización"].includes(a)).flatMap(area=>YEARS.map(anio=>({area,anio,presupuesto:45000})))
+];
 
 const INK = "#0B2A3D";
 const INK_2 = "#123B52";
@@ -57,6 +93,12 @@ const TIPO_STYLE = {
   "Nuevo":      { bg: "#DCF5EF", text: "#0B6E64" },
   "Reposición": { bg: "#FDEBDC", text: "#B45A0F" },
 };
+const CRITICIDAD_STYLE = {
+  "Crítica": { bg:"#FBE2DE", text:"#A3341E", dot:"#C83B22" },
+  "Alta": { bg:"#FDEBDC", text:"#B45A0F", dot:"#E3A008" },
+  "Media": { bg:"#FDF3D8", text:"#8A6D00", dot:"#D4A017" },
+  "Baja": { bg:"#DCF5EF", text:"#0B6E64", dot:"#12A594" },
+};
 const CHART_PALETTE = [INK, TEAL, AMBER, CORAL, VIOLET, "#3D8BD4", "#8A6D00", SLATE_LIGHT, "#0B6E64", "#B45A0F"];
 
 const fmtUSD = (n) => "$" + Math.round(n).toLocaleString("es-EC");
@@ -86,13 +128,21 @@ function saveLocal(key, value) {
     window.localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
   } catch (e) { /* almacenamiento lleno o no disponible: se ignora silenciosamente */ }
 }
+function escapeXml(value) { return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;"); }
+function downloadXML(rows) {
+  const fields=["id","fecha","fechaEntrega","anio","area","servicio","responsable","equipo","tipo","criticidad","prioridad","estado","valorUnitario","cantidad","total","justificacion","observaciones"];
+  const body=rows.map(r=>`    <solicitud>\n${fields.map(f=>`      <${f}>${escapeXml(r[f])}</${f}>`).join("\n")}\n    </solicitud>`).join("\n");
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<adquisiciones hospital="Gestión de Adquisiciones Biomédicas" fecha_exportacion="${new Date().toISOString()}">\n${body}\n</adquisiciones>`;
+  const blob=new Blob([xml],{type:"application/xml;charset=utf-8"}), url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download=`adquisiciones_biomedicas_${new Date().toISOString().slice(0,10)}.xml`; a.click(); URL.revokeObjectURL(url);
+}
 
 export default function App() {
   const cloudMode = isFirebaseConfigured;
   const [cloudReady, setCloudReady] = useState(!cloudMode);
   const [tab, setTab] = useState("dashboard");
-  const [data, setData] = useState(() => (cloudMode ? [] : loadLocal("data", INITIAL_DATA)));
-  const [budget, setBudget] = useState(() => (cloudMode ? [] : loadLocal("budget", INITIAL_BUDGET)));
+  const [data, setData] = useState(() => { const saved = cloudMode ? null : loadLocal("data", null); return cloudMode ? [] : (Array.isArray(saved) && saved.length ? saved : INITIAL_DATA); });
+  const [budget, setBudget] = useState(() => { const saved = cloudMode ? null : loadLocal("budget", null); return cloudMode ? [] : (Array.isArray(saved) && saved.length ? saved : INITIAL_BUDGET); });
   const [areas, setAreas] = useState(() => (cloudMode ? [] : loadLocal("areas", AREAS_DEFAULT)));
   const [responsables, setResponsables] = useState(() => (cloudMode ? [] : loadLocal("responsables", RESPONSABLES_DEFAULT)));
   const [filters, setFilters] = useState({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" });
@@ -105,12 +155,13 @@ export default function App() {
   const [newResp, setNewResp] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, dir: null });
+  const [areaMetric, setAreaMetric] = useState("inversion");
   const [authModal, setAuthModal] = useState(null); // { type: "delete"|"edit", id }
   const [authPass, setAuthPass] = useState("");
   const [authError, setAuthError] = useState("");
   const emptyForm = {
     id: "", fecha: new Date().toISOString().slice(0, 10), fechaEntrega: "", area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
-    equipo: "", tipo: "Nuevo", justificacion: "", prioridad: "Media", estado: "Pendiente",
+    equipo: "", tipo: "Nuevo", justificacion: "", criticidad: "Media", prioridad: "Media", estado: "Pendiente",
     valorUnitario: "", cantidad: 1, observaciones: "",
   };
   const [form, setForm] = useState(emptyForm);
@@ -180,7 +231,7 @@ export default function App() {
       id: editingId || form.id.trim(),
       fecha: form.fecha, fechaEntrega: form.fechaEntrega || "", anio: year, area: form.area, servicio: form.servicio || form.area,
       responsable: form.responsable, equipo: form.equipo, tipo: form.tipo,
-      justificacion: form.justificacion || "Sin justificación registrada", prioridad: form.prioridad,
+      justificacion: form.justificacion || "Sin justificación registrada", criticidad: form.criticidad || form.prioridad || "Media", prioridad: form.prioridad,
       estado: form.estado, valorUnitario: Number(form.valorUnitario), cantidad: Number(form.cantidad) || 1,
       total: Number(form.valorUnitario) * (Number(form.cantidad) || 1), observaciones: form.observaciones,
     };
@@ -226,7 +277,7 @@ export default function App() {
       if (rec) {
         setForm({
           id: rec.id, fecha: rec.fecha, fechaEntrega: rec.fechaEntrega || "", area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
-          equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, prioridad: rec.prioridad,
+          equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, criticidad: rec.criticidad || rec.prioridad || "Media", prioridad: rec.prioridad,
           estado: rec.estado, valorUnitario: String(rec.valorUnitario), cantidad: String(rec.cantidad),
           observaciones: rec.observaciones || "",
         });
@@ -312,16 +363,16 @@ export default function App() {
     const total = data.length;
     const invTotal = data.reduce((s, r) => s + r.total, 0);
     const invProm = total ? invTotal / total : 0;
-    const nuevos = data.filter((r) => r.tipo === "Nuevo").length;
-    const aprobadas = data.filter((r) => r.estado === "Aprobado" || r.estado === "Adquirido").length;
-    const presTotal = budget.reduce((s, b) => s + b.presupuesto, 0);
-    const ejecTotal = data.filter((r) => r.estado === "Aprobado" || r.estado === "Adquirido").reduce((s, r) => s + r.total, 0);
-    return {
-      total, invTotal, invProm,
-      pctNuevos: total ? nuevos / total : 0,
-      pctAprobadas: total ? aprobadas / total : 0,
-      pctPresupuesto: presTotal ? ejecTotal / presTotal : 0,
-    };
+    const nuevos = data.filter((r) => r.tipo === "Nuevo");
+    const reposiciones = data.filter((r) => r.tipo === "Reposición");
+    const aprobadas = data.filter((r) => r.estado === "Aprobado" || r.estado === "Adquirido");
+    const presTotal = budget.reduce((s, b) => s + Number(b.presupuesto || 0), 0);
+    const ejecTotal = aprobadas.reduce((s, r) => s + Number(r.total || 0), 0);
+    const unidades = data.reduce((s, r) => s + Number(r.cantidad || 0), 0);
+    return { total, unidades, invTotal, invProm, nuevosN:nuevos.length, reposicionesN:reposiciones.length,
+      nuevosInv:nuevos.reduce((s,r)=>s+Number(r.total||0),0), reposicionesInv:reposiciones.reduce((s,r)=>s+Number(r.total||0),0),
+      pctNuevos:total?nuevos.length/total:0, pctAprobadas:total?aprobadas.length/total:0,
+      pctPresupuesto:presTotal?ejecTotal/presTotal:0, presTotal, ejecTotal };
   }, [data, budget]);
 
   const matchesValorRango = (r, rango) => {
@@ -367,20 +418,10 @@ export default function App() {
     return arr;
   }, [data, dbSearch, dbFilterEstado, sortConfig]);
 
-  const byArea = useMemo(() => areas.map((a) => ({
-    area: a, n: data.filter((r) => r.area === a).length,
-    inversion: data.filter((r) => r.area === a).reduce((s, r) => s + r.total, 0),
-  })).sort((a, b) => b.inversion - a.inversion), [data, areas]);
-
-  const byEstado = useMemo(() => ESTADOS.map((e) => ({
-    estado: e, n: data.filter((r) => r.estado === e).length,
-    inversion: data.filter((r) => r.estado === e).reduce((s, r) => s + r.total, 0),
-  })), [data]);
-
-  const byTipo = useMemo(() => TIPOS.map((t) => ({
-    tipo: t, n: data.filter((r) => r.tipo === t).length,
-    inversion: data.filter((r) => r.tipo === t).reduce((s, r) => s + r.total, 0),
-  })), [data]);
+  const byArea = useMemo(() => areas.map((a) => { const rows=data.filter(r=>r.area===a); return {area:a,n:rows.length,unidades:rows.reduce((s,r)=>s+Number(r.cantidad||0),0),inversion:rows.reduce((s,r)=>s+Number(r.total||0),0)}; }).filter(r=>r.n>0).sort((a,b)=>b[areaMetric]-a[areaMetric]), [data,areas,areaMetric]);
+  const byEstado = useMemo(() => ESTADOS.map(e=>{const rows=data.filter(r=>r.estado===e);return {estado:e,n:rows.length,unidades:rows.reduce((s,r)=>s+Number(r.cantidad||0),0),inversion:rows.reduce((s,r)=>s+Number(r.total||0),0)};}),[data]);
+  const byTipo = useMemo(() => TIPOS.map(t=>{const rows=data.filter(r=>r.tipo===t);return {tipo:t,n:rows.length,unidades:rows.reduce((s,r)=>s+Number(r.cantidad||0),0),inversion:rows.reduce((s,r)=>s+Number(r.total||0),0)};}),[data]);
+  const byCriticidad = useMemo(() => CRITICIDADES.map(c=>{const rows=data.filter(r=>(r.criticidad||r.prioridad||"Media")===c);return {criticidad:c,n:rows.length,unidades:rows.reduce((s,r)=>s+Number(r.cantidad||0),0),inversion:rows.reduce((s,r)=>s+Number(r.total||0),0)};}).filter(r=>r.n>0),[data]);
 
   const byResponsable = useMemo(() => responsables.map((p) => ({
     responsable: p, n: data.filter((r) => r.responsable === p).length,
@@ -519,30 +560,11 @@ export default function App() {
 
         {tab === "dashboard" && (
           <div>
-            {/* KPI ROW */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12, marginBottom: 18 }}>
-              {[
-                { label: "TOTAL SOLICITUDES", value: kpis.total, fmt: (v) => v, icon: Package, accent: INK },
-                { label: "INVERSIÓN TOTAL", value: kpis.invTotal, fmt: fmtUSDk, icon: TrendingUp, accent: TEAL_DARK },
-                { label: "INVERSIÓN PROMEDIO", value: kpis.invProm, fmt: fmtUSDk, icon: Activity, accent: "#3D8BD4" },
-                { label: "% EQUIPOS NUEVOS", value: kpis.pctNuevos, fmt: fmtPct, icon: ClipboardCheck, accent: VIOLET },
-                { label: "% APROBADAS", value: kpis.pctAprobadas, fmt: fmtPct, icon: CheckCircle2, accent: TEAL },
-                { label: "% PRESUPUESTO EJEC.", value: kpis.pctPresupuesto, fmt: fmtPct, icon: AlertTriangle,
-                  accent: kpis.pctPresupuesto > 1 ? CORAL : kpis.pctPresupuesto >= 0.8 ? AMBER : TEAL },
-              ].map((k, i) => {
-                const Icon = k.icon;
-                return (
-                  <div key={i} className="card" style={{ padding: "14px 16px", borderTop: "3px solid " + k.accent }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", color: SLATE_LIGHT }}>{k.label}</span>
-                      <Icon size={14} color={k.accent} />
-                    </div>
-                    <div className="mono" style={{ fontSize: 22, fontWeight: 600, color: INK, marginTop: 8 }}>{k.fmt(k.value)}</div>
-                  </div>
-                );
-              })}
-            </div>
-
+            {/* KPI ROW · enfoque administrativo */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(6,minmax(0,1fr))",gap:12,marginBottom:14}}>{[
+              ["SOLICITUDES",kpis.total,(v)=>v.toLocaleString("es-EC"),Package,INK],["INVERSIÓN TOTAL",kpis.invTotal,fmtUSDk,Wallet,TEAL_DARK],["UNIDADES",kpis.unidades,(v)=>v.toLocaleString("es-EC"),Activity,"#3D8BD4"],["INVERSIÓN NUEVOS",kpis.nuevosInv,fmtUSDk,TrendingUp,TEAL],["INVERSIÓN REPOSICIÓN",kpis.reposicionesInv,fmtUSDk,ClipboardCheck,AMBER],["EJECUTADO / PRESUP.",kpis.pctPresupuesto,fmtPct,CheckCircle2,kpis.pctPresupuesto>1?CORAL:kpis.pctPresupuesto>=.8?AMBER:TEAL]
+            ].map(([label,value,fmt,Icon,accent],i)=><div key={i} className="card" style={{padding:"13px 15px",borderTop:"3px solid "+accent}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:9.5,fontWeight:700,color:SLATE_LIGHT}}>{label}</span><Icon size={14} color={accent}/></div><div className="mono" style={{fontSize:21,fontWeight:600,marginTop:8}}>{fmt(value)}</div></div>)}</div>
+            <div style={{display:"flex",gap:10,marginBottom:18,alignItems:"center"}}><div className="card" style={{padding:"9px 13px",flex:1,display:"flex",justifyContent:"space-between"}}><span style={{fontSize:12,color:SLATE_LIGHT}}>Composición de la inversión</span><span style={{fontSize:12.5}}><b style={{color:TEAL_DARK}}>Nuevos {fmtUSD(kpis.nuevosInv)}</b> · <b style={{color:"#B45A0F"}}>Reposición {fmtUSD(kpis.reposicionesInv)}</b></span></div><div className="card" style={{padding:"9px 13px",minWidth:250,textAlign:"right"}}><span style={{fontSize:11,color:SLATE_LIGHT}}>Presupuesto total</span> <b className="mono">{fmtUSD(kpis.presTotal)}</b></div></div>
             {/* FILTERS */}
             <div className="card" style={{ padding: "14px 18px", marginBottom: 18, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: SLATE, fontSize: 12.5, fontWeight: 600 }}>
@@ -747,88 +769,16 @@ export default function App() {
               )}
             </div>
           )}
-            {/* CHARTS GRID */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Inversión total por área</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={byArea} layout="vertical" margin={{ left: 10, right: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-                    <XAxis type="number" tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
-                    <YAxis type="category" dataKey="area" width={110} tick={{ fontSize: 11, fill: SLATE }} />
-                    <Tooltip formatter={(v) => fmtUSD(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                    <Bar dataKey="inversion" fill={TEAL} radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Distribución por estado</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <PieChart>
-                    <Pie data={byEstado} dataKey="n" nameKey="estado" cx="50%" cy="50%" innerRadius={54} outerRadius={90} paddingAngle={2}>
-                      {byEstado.map((e, i) => <Cell key={i} fill={STATUS_STYLE[e.estado].dot} />)}
-                    </Pie>
-                    <Tooltip formatter={(v, n, p) => [v + " solicitudes", p.payload.estado]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: 11.5 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Equipos nuevos vs. reposición</div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie data={byTipo} dataKey="n" nameKey="tipo" cx="50%" cy="50%" outerRadius={88} label={(p) => p.tipo + " " + (p.percent * 100).toFixed(0) + "%"} labelLine={false}>
-                      <Cell fill={TEAL} />
-                      <Cell fill={AMBER} />
-                    </Pie>
-                    <Tooltip formatter={(v) => v + " solicitudes"} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Inversión por responsable</div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={byResponsable} layout="vertical" margin={{ left: 10, right: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-                    <XAxis type="number" tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
-                    <YAxis type="category" dataKey="responsable" width={110} tick={{ fontSize: 11, fill: SLATE }} />
-                    <Tooltip formatter={(v) => fmtUSD(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                    <Bar dataKey="inversion" fill={INK} radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Evolución de inversión por año</div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={byYear} margin={{ top: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-                    <XAxis dataKey="anio" tick={{ fontSize: 11.5, fill: SLATE }} />
-                    <YAxis tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
-                    <Tooltip formatter={(v) => fmtUSD(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                    <Bar dataKey="inversion" fill={VIOLET} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Presupuesto vs. ejecutado por área</div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={budgetByArea} margin={{ top: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-                    <XAxis dataKey="area" tick={{ fontSize: 9.5, fill: SLATE_LIGHT }} angle={-30} textAnchor="end" height={70} interval={0} />
-                    <YAxis tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
-                    <Tooltip formatter={(v) => fmtUSD(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="presupuesto" name="Presupuesto" fill="#B9CBD6" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="ejecutado" name="Ejecutado" fill={AMBER} radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+            {/* CHARTS GRID · vista ejecutiva */}
+            <div style={{display:"grid",gridTemplateColumns:"1.25fr .9fr",gap:16}}>
+              <div className="card" style={{padding:"16px 18px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Adquisiciones por área</div><div style={{fontSize:11,color:SLATE_LIGHT}}>Ordenar por solicitudes o por valor</div></div><div style={{display:"flex",gap:5}}>{[["n","Solicitudes"],["inversion","Valor"]].map(([k,l])=><button key={k} className="btn-ghost" onClick={()=>setAreaMetric(k)} style={{padding:"5px 9px",fontSize:11,background:areaMetric===k?INK:"#fff",color:areaMetric===k?"#fff":SLATE}}>{l}</button>)}</div></div><ResponsiveContainer width="100%" height={290}><BarChart data={byArea} layout="vertical" margin={{left:10,right:28}}><CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false}/><XAxis type="number" tickFormatter={areaMetric==="inversion"?fmtUSDk:undefined} tick={{fontSize:11,fill:SLATE_LIGHT}}/><YAxis type="category" dataKey="area" width={115} tick={{fontSize:10.5,fill:SLATE}}/><Tooltip formatter={(v,n,p)=>areaMetric==="inversion"?[fmtUSD(v),"Inversión"]:[v+" solicitudes","Solicitudes"]} contentStyle={{fontSize:12,borderRadius:8}}/><Bar dataKey={areaMetric} fill={TEAL} radius={[0,4,4,0]}/></BarChart></ResponsiveContainer></div>
+              <div className="card" style={{padding:"16px 18px"}}><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Distribución por estado</div><div style={{fontSize:11,color:SLATE_LIGHT}}>Cantidad e inversión por estado</div><ResponsiveContainer width="100%" height={290}><PieChart><Pie data={byEstado.filter(e=>e.n>0)} dataKey="n" nameKey="estado" cx="50%" cy="47%" innerRadius={55} outerRadius={91} paddingAngle={2}>{byEstado.filter(e=>e.n>0).map((e,i)=><Cell key={i} fill={STATUS_STYLE[e.estado].dot}/>)}</Pie><Tooltip formatter={(v,n,p)=>[`${v} solicitudes · ${fmtUSD(p.payload.inversion)}`,p.payload.estado]} contentStyle={{fontSize:12,borderRadius:8}}/><Legend iconType="circle" wrapperStyle={{fontSize:11}}/></PieChart></ResponsiveContainer></div>
+              <div className="card" style={{padding:"16px 18px"}}><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Nuevo vs. Reposición</div><div style={{fontSize:11,color:SLATE_LIGHT}}>Inversión y volumen de solicitudes</div><ResponsiveContainer width="100%" height={250}><BarChart data={byTipo} margin={{top:15,right:18,left:4}}><CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false}/><XAxis dataKey="tipo" tick={{fontSize:11,fill:SLATE}}/><YAxis tickFormatter={fmtUSDk} tick={{fontSize:11,fill:SLATE_LIGHT}}/><Tooltip formatter={(v,n,p)=>[fmtUSD(v),`Inversión · ${p.payload.n} solicitudes · ${p.payload.unidades} unidades`]} contentStyle={{fontSize:12,borderRadius:8}}/><Bar dataKey="inversion" radius={[5,5,0,0]}><Cell fill={TEAL}/><Cell fill={AMBER}/></Bar></BarChart></ResponsiveContainer></div>
+              <div className="card" style={{padding:"16px 18px"}}><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Adquisiciones por criticidad</div><div style={{fontSize:11,color:SLATE_LIGHT}}>Cantidad, unidades e inversión al pasar el cursor</div><ResponsiveContainer width="100%" height={250}><PieChart><Pie data={byCriticidad} dataKey="n" nameKey="criticidad" cx="50%" cy="47%" innerRadius={48} outerRadius={86} paddingAngle={2}>{byCriticidad.map((e,i)=><Cell key={i} fill={CRITICIDAD_STYLE[e.criticidad].dot}/>)}</Pie><Tooltip formatter={(v,n,p)=>[`${v} solicitudes · ${p.payload.unidades} unidades · ${fmtUSD(p.payload.inversion)}`,p.payload.criticidad]} contentStyle={{fontSize:12,borderRadius:8}}/><Legend iconType="circle" wrapperStyle={{fontSize:11}}/></PieChart></ResponsiveContainer></div>
+              <div className="card" style={{padding:"16px 18px"}}><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Presupuesto vs. ejecutado</div><ResponsiveContainer width="100%" height={250}><BarChart data={budgetByArea.filter(x=>x.presupuesto>0||x.ejecutado>0)} margin={{top:10}}><CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false}/><XAxis dataKey="area" tick={{fontSize:9.5,fill:SLATE_LIGHT}} angle={-30} textAnchor="end" height={70} interval={0}/><YAxis tickFormatter={fmtUSDk} tick={{fontSize:11,fill:SLATE_LIGHT}}/><Tooltip formatter={(v,n)=>[fmtUSD(v),n]} contentStyle={{fontSize:12,borderRadius:8}}/><Legend wrapperStyle={{fontSize:11}}/><Bar dataKey="presupuesto" name="Presupuesto" fill="#B9CBD6" radius={[3,3,0,0]}/><Bar dataKey="ejecutado" name="Ejecutado" fill={TEAL} radius={[3,3,0,0]}/></BarChart></ResponsiveContainer></div>
+              <div className="card" style={{padding:"16px 18px"}}><div className="disp" style={{fontSize:13.5,fontWeight:700}}>Responsables por inversión</div><div style={{fontSize:11,color:SLATE_LIGHT}}>Top 8</div><ResponsiveContainer width="100%" height={250}><BarChart data={byResponsable.slice(0,8)} layout="vertical" margin={{left:8,right:22}}><CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false}/><XAxis type="number" tickFormatter={fmtUSDk} tick={{fontSize:11,fill:SLATE_LIGHT}}/><YAxis type="category" dataKey="responsable" width={105} tick={{fontSize:9.5,fill:SLATE}}/><Tooltip formatter={(v,n,p)=>[fmtUSD(v),`${p.payload.n} solicitudes`]} contentStyle={{fontSize:12,borderRadius:8}}/><Bar dataKey="inversion" fill={INK} radius={[0,4,4,0]}/></BarChart></ResponsiveContainer></div>
             </div>
+            <div className="card" style={{marginTop:16,padding:"14px 18px",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}><div><div style={{fontSize:10,color:SLATE_LIGHT,fontWeight:700}}>APROBADAS / ADQUIRIDAS</div><div className="mono" style={{fontSize:18,fontWeight:700}}>{fmtUSD(kpis.ejecTotal)}</div></div><div><div style={{fontSize:10,color:SLATE_LIGHT,fontWeight:700}}>PENDIENTE + REVISIÓN</div><div className="mono" style={{fontSize:18,fontWeight:700}}>{fmtUSD(byEstado.filter(e=>e.estado==="Pendiente"||e.estado==="En Revisión").reduce((s,e)=>s+e.inversion,0))}</div></div><div><div style={{fontSize:10,color:SLATE_LIGHT,fontWeight:700}}>CRITICIDAD CRÍTICA</div><div className="mono" style={{fontSize:18,fontWeight:700,color:CORAL}}>{byCriticidad.find(e=>e.criticidad==="Crítica")?.n||0} solicitudes</div></div><div style={{marginLeft:"auto",fontSize:11.5,color:SLATE_LIGHT,maxWidth:420}}>Vista ejecutiva para comité administrativo: inversión, ejecución, composición de la compra y riesgo clínico.</div></div>
           </div>
         )}
 
@@ -844,9 +794,8 @@ export default function App() {
                 <option>Todos</option>
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
               </select>
-              <span style={{ marginLeft: "auto", fontSize: 12.5, color: SLATE_LIGHT }}>
-                {dbFiltered.length} registros
-              </span>
+              <span style={{ marginLeft: "auto", fontSize: 12.5, color: SLATE_LIGHT }}>{dbFiltered.length} registros</span>
+              <button className="btn-ghost" onClick={() => { downloadXML(data); showToast("XML generado con toda la base de datos."); }}><FileDown size={14} /> Descargar XML</button>
             </div>
 
             <div className="card" style={{ overflow: "hidden" }}>
@@ -870,9 +819,9 @@ export default function App() {
                       <th className="th">Tipo</th>
                       <th className="th">Prioridad</th>
                       <th className="th">Estado</th>
-                      <th className="th">V. Unitario</th>
-                      <th className="th">Cant.</th>
-                      <th className="th">Inversión</th>
+                      <th className="th"><button type="button" className="sortbtn" onClick={() => toggleSort("valorUnitario")}>V. Unitario {sortIcon("valorUnitario")}</button></th>
+                      <th className="th"><button type="button" className="sortbtn" onClick={() => toggleSort("cantidad")}>Cant. {sortIcon("cantidad")}</button></th>
+                      <th className="th"><button type="button" className="sortbtn" onClick={() => toggleSort("total")}>Inversión {sortIcon("total")}</button></th>
                       <th className="th">Justificación</th>
                       <th className="th">Observaciones</th>
                       <th className="th"></th>
@@ -1168,13 +1117,13 @@ export default function App() {
             {[
               { t: "1. Estructura del panel", icon: LayoutDashboard, items: [
                 "Dashboard: KPIs gerenciales, filtros interactivos y gráficos dinámicos.",
-                "Base de Datos: registro completo de solicitudes, editable en cualquier momento.",
+                "Base de Datos: registro completo de solicitudes, editable y descargable en XML.",
                 "Presupuesto: presupuesto por área y año con ejecución automática.",
                 "Resumen y Pivotes: tablas cruzadas equivalentes a tablas dinámicas de Excel.",
               ]},
               { t: "2. Cómo agregar una solicitud", icon: Plus, items: [
                 "Haz clic en 'Nueva solicitud' desde el Dashboard o la Base de Datos.",
-                "Completa los campos: equipo, área, responsable, tipo, prioridad, estado y valores.",
+                "Completa los campos: equipo, área, responsable, tipo, criticidad, prioridad, estado y valores.",
                 "La inversión total se calcula automáticamente (valor unitario × cantidad).",
                 "Hay dos fechas: 'Fecha de solicitud' (cuándo se registró) y 'Fecha de entrega / actualización de estado' (cuándo se entregó el equipo o cambió su estado). Esta segunda es opcional.",
                 "Al guardar, todos los KPIs, gráficos y pivotes se actualizan al instante.",
@@ -1282,10 +1231,12 @@ export default function App() {
                   </select>
                 </div>
                 <div>
+                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Criticidad</label>
+                  <select className="sel" style={{ width: "100%" }} value={form.criticidad} onChange={(e) => setForm((f) => ({ ...f, criticidad: e.target.value }))}>{CRITICIDADES.map(p=><option key={p}>{p}</option>)}</select>
+                </div>
+                <div>
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Prioridad</label>
-                  <select className="sel" style={{ width: "100%" }} value={form.prioridad} onChange={(e) => setForm((f) => ({ ...f, prioridad: e.target.value }))}>
-                    {PRIORIDADES.map((p) => <option key={p}>{p}</option>)}
-                  </select>
+                  <select className="sel" style={{ width: "100%" }} value={form.prioridad} onChange={(e) => setForm((f) => ({ ...f, prioridad: e.target.value }))}>{PRIORIDADES.map(p=><option key={p}>{p}</option>)}</select>
                 </div>
                 <div>
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Estado</label>
