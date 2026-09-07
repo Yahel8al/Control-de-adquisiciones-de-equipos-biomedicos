@@ -23,18 +23,17 @@ const RESPONSABLES_DEFAULT = ["Bqf.Johana Guevara","Lcda.Diana Ramón","Lcda.Mar
   "Bqf.Gabriela Romero","Ing.Alan Ochoa","Aux.Paola Ucho"];
 const TIPOS = ["Nuevo", "Reposición"];
 const PRIORIDADES = ["Alta", "Media", "Baja"];
-const CRITICIDADES = ["Crítica", "Alta", "Media", "Baja"];
 const ESTADOS = ["Pendiente", "En Revisión", "Aprobado", "Rechazado", "Adquirido"];
 const YEARS = [2025, 2026];
 
 const INITIAL_DATA = [
-  { id: "SOL-2026-001", fecha: "2026-01-12", fechaEntrega: "", anio: 2026, area: "UCI", servicio: "UCI Adultos", responsable: "Lcda.Diana Ramón", equipo: "Ventilador Mecánico de Alta Gama", tipo: "Reposición", criticidad: "Crítica", prioridad: "Alta", estado: "Aprobado", valorUnitario: 28500, cantidad: 2, total: 57000, justificacion: "Reemplazo de equipos con vida útil cumplida.", observaciones: "Urgente" },
-  { id: "SOL-2026-002", fecha: "2026-01-15", fechaEntrega: "2026-02-10", anio: 2026, area: "Imagenología", servicio: "Rayos X", responsable: "Ing.Alan Ochoa", equipo: "Ecógrafo Portátil 3D", tipo: "Nuevo", criticidad: "Alta", prioridad: "Media", estado: "Adquirido", valorUnitario: 42000, cantidad: 1, total: 42000, justificacion: "Ampliación de servicios en emergencias.", observaciones: "" },
-  { id: "SOL-2026-003", fecha: "2026-02-02", fechaEntrega: "", anio: 2026, area: "Emergencias", servicio: "Triage", responsable: "Bqf.Johana Guevara", equipo: "Monitor Multiparamétrico", tipo: "Nuevo", criticidad: "Alta", prioridad: "Alta", estado: "En Revisión", valorUnitario: 3500, cantidad: 5, total: 17500, justificacion: "Déficit de monitores en área de triage.", observaciones: "Cotizaciones en evaluación" },
-  { id: "SOL-2026-004", fecha: "2026-02-20", fechaEntrega: "", anio: 2026, area: "Quirófano", servicio: "Cirugía General", responsable: "Lcda.Marcela Pesantez", equipo: "Mesa Quirúrgica Electrohidráulica", tipo: "Reposición", criticidad: "Media", prioridad: "Media", estado: "Pendiente", valorUnitario: 18000, cantidad: 1, total: 18000, justificacion: "Mesa actual presenta fallas recurrentes.", observaciones: "" },
-  { id: "SOL-2025-089", fecha: "2025-11-05", fechaEntrega: "2025-12-15", anio: 2025, area: "Laboratorio Clínico", servicio: "Hematología", responsable: "Bqf.Gabriela Romero", equipo: "Analizador Hematológico Automático", tipo: "Nuevo", criticidad: "Alta", prioridad: "Alta", estado: "Adquirido", valorUnitario: 34000, cantidad: 1, total: 34000, justificacion: "Actualización tecnológica.", observaciones: "Instalado y calibrado" },
-  { id: "SOL-2026-005", fecha: "2026-03-01", fechaEntrega: "", anio: 2026, area: "Hospitalización", servicio: "Piso 2", responsable: "Lcda.Mariela Peñalosa", equipo: "Camas Hospitalarias Eléctricas", tipo: "Reposición", criticidad: "Baja", prioridad: "Baja", estado: "Rechazado", valorUnitario: 1200, cantidad: 10, total: 12000, justificacion: "Mejora de confort del paciente.", observaciones: "Sin presupuesto actual" },
-  { id: "SOL-2026-006", fecha: "2026-03-10", fechaEntrega: "", anio: 2026, area: "Consulta Externa", servicio: "Cardiología", responsable: "Lcda.Isabel León", equipo: "Electrocardiógrafo de 12 canales", tipo: "Nuevo", criticidad: "Media", prioridad: "Media", estado: "Aprobado", valorUnitario: 2100, cantidad: 2, total: 4200, justificacion: "Incremento de demanda de pacientes.", observaciones: "En proceso de compra" }
+  { id: "SOL-2026-001", fecha: "2026-01-12", fechaEntrega: "", anio: 2026, area: "UCI", servicio: "UCI Adultos", responsable: "Lcda.Diana Ramón", equipo: "Ventilador Mecánico de Alta Gama", tipo: "Reposición", prioridad: "Alta", estado: "Aprobado", valorUnitario: 28500, cantidad: 2, total: 57000, justificacion: "Reemplazo de equipos con vida útil cumplida.", observaciones: "Urgente" },
+  { id: "SOL-2026-002", fecha: "2026-01-15", fechaEntrega: "2026-02-10", anio: 2026, area: "Imagenología", servicio: "Rayos X", responsable: "Ing.Alan Ochoa", equipo: "Ecógrafo Portátil 3D", tipo: "Nuevo", prioridad: "Media", estado: "Adquirido", valorUnitario: 42000, cantidad: 1, total: 42000, justificacion: "Ampliación de servicios en emergencias.", observaciones: "" },
+  { id: "SOL-2026-003", fecha: "2026-02-02", fechaEntrega: "", anio: 2026, area: "Emergencias", servicio: "Triage", responsable: "Bqf.Johana Guevara", equipo: "Monitor Multiparamétrico", tipo: "Nuevo", prioridad: "Alta", estado: "En Revisión", valorUnitario: 3500, cantidad: 5, total: 17500, justificacion: "Déficit de monitores en área de triage.", observaciones: "Cotizaciones en evaluación" },
+  { id: "SOL-2026-004", fecha: "2026-02-20", fechaEntrega: "", anio: 2026, area: "Quirófano", servicio: "Cirugía General", responsable: "Lcda.Marcela Pesantez", equipo: "Mesa Quirúrgica Electrohidráulica", tipo: "Reposición", prioridad: "Media", estado: "Pendiente", valorUnitario: 18000, cantidad: 1, total: 18000, justificacion: "Mesa actual presenta fallas recurrentes.", observaciones: "" },
+  { id: "SOL-2025-089", fecha: "2025-11-05", fechaEntrega: "2025-12-15", anio: 2025, area: "Laboratorio Clínico", servicio: "Hematología", responsable: "Bqf.Gabriela Romero", equipo: "Analizador Hematológico Automático", tipo: "Nuevo", prioridad: "Alta", estado: "Adquirido", valorUnitario: 34000, cantidad: 1, total: 34000, justificacion: "Actualización tecnológica.", observaciones: "Instalado y calibrado" },
+  { id: "SOL-2026-005", fecha: "2026-03-01", fechaEntrega: "", anio: 2026, area: "Hospitalización", servicio: "Piso 2", responsable: "Lcda.Mariela Peñalosa", equipo: "Camas Hospitalarias Eléctricas", tipo: "Reposición", prioridad: "Baja", estado: "Rechazado", valorUnitario: 1200, cantidad: 10, total: 12000, justificacion: "Mejora de confort del paciente.", observaciones: "Sin presupuesto actual" },
+  { id: "SOL-2026-006", fecha: "2026-03-10", fechaEntrega: "", anio: 2026, area: "Consulta Externa", servicio: "Cardiología", responsable: "Lcda.Isabel León", equipo: "Electrocardiógrafo de 12 canales", tipo: "Nuevo", prioridad: "Media", estado: "Aprobado", valorUnitario: 2100, cantidad: 2, total: 4200, justificacion: "Incremento de demanda de pacientes.", observaciones: "En proceso de compra" }
 ];
 
 const INITIAL_BUDGET = YEARS.flatMap((y) => AREAS_DEFAULT.map((a) => {
@@ -63,6 +62,9 @@ const BORDER = "#E2E8ED";
 const BG = "#F3F6F7";
 const CARD = "#FFFFFF";
 
+// Paleta general para gráficos que no tienen un color semántico estricto
+const CHART_PALETTE = [TEAL, INK_2, VIOLET, "#3D8BD4", AMBER, CORAL, "#0B6E64", "#7C6AE0"];
+
 const STATUS_STYLE = {
   "Pendiente":   { bg: "#FDF3D8", text: "#8A6D00", dot: "#E3A008" },
   "En Revisión": { bg: "#DCEAFE", text: "#1E4E8C", dot: "#3D8BD4" },
@@ -75,13 +77,6 @@ const PRIORITY_STYLE = {
   "Alta":  { bg: "#FBE2DE", text: "#A3341E", chart: "#A3341E" },
   "Media": { bg: "#FDF3D8", text: "#8A6D00", chart: "#E3A008" },
   "Baja":  { bg: "#DCF5EF", text: "#0B6E64", chart: "#12A594" },
-};
-
-const CRITICIDAD_STYLE = {
-  "Crítica": { bg: "#FBE2DE", text: "#A3341E", chart: "#E4572E" },
-  "Alta":    { bg: "#FBE2DE", text: "#A3341E", chart: "#A3341E" },
-  "Media":   { bg: "#FDF3D8", text: "#8A6D00", chart: "#E3A008" },
-  "Baja":    { bg: "#DCF5EF", text: "#0B6E64", chart: "#12A594" },
 };
 
 const TIPO_STYLE = {
@@ -98,7 +93,6 @@ const fmtUSDk = (n) => {
 const fmtPct = (n) => (n * 100).toFixed(1) + "%";
 const APP_PASSWORD = "1a2b3c";
 
-// --- Persistencia local ---
 const STORAGE_PREFIX = "acq_equipos_medicos_";
 const presupuestoId = (area, anio) =>`${area}_${anio}`.replace(/[\/\\]/g, "-");
 function loadLocal(key, fallback) {
@@ -130,7 +124,6 @@ const escapeXML = (str) => {
   });
 };
 
-// Componente para los botones estilo "Tabs"
 const TabButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
@@ -152,13 +145,12 @@ const TabButton = ({ active, onClick, children }) => (
   </button>
 );
 
-// Tooltip Unificado con colores dinámicos
+// Tooltip Dinámico
 const SharedTooltip = ({ active, payload, label, titlePrefix }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    // Extraemos el color directamente de Recharts para que coincida con la barra/porción
-    const color = payload[0].fill || INK; 
-    const categoryName = data.name || data.estado || data.tipo || data.prioridad || data.criticidad || data.area || data.equipo || label;
+    const color = data.fill || payload[0].color || payload[0].fill || INK; 
+    const categoryName = data.name || data.estado || data.tipo || data.prioridad || data.area || data.equipo || label;
     
     return (
       <div style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "12px 16px", borderRadius: 8, boxShadow: "0 4px 14px rgba(0,0,0,0.08)", minWidth: 200 }}>
@@ -202,13 +194,12 @@ export default function App() {
   const [authPass, setAuthPass] = useState("");
   const [authError, setAuthError] = useState("");
   
-  // Controles de gráficos
   const [areaChartMode, setAreaChartMode] = useState("inversion");
   const [estadoChartMode, setEstadoChartMode] = useState("inversion");
 
   const emptyForm = {
     id: "", fecha: new Date().toISOString().slice(0, 10), fechaEntrega: "", area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
-    equipo: "", tipo: "Nuevo", justificacion: "", criticidad: "Media", prioridad: "Media", estado: "Pendiente",
+    equipo: "", tipo: "Nuevo", justificacion: "", prioridad: "Media", estado: "Pendiente",
     valorUnitario: "", cantidad: 1, observaciones: "",
   };
   const [form, setForm] = useState(emptyForm);
@@ -274,7 +265,7 @@ export default function App() {
     const record = {
       id: editingId || form.id.trim(),
       fecha: form.fecha, fechaEntrega: form.fechaEntrega || "", anio: year, area: form.area, servicio: form.servicio || form.area,
-      responsable: form.responsable, equipo: form.equipo, tipo: form.tipo, criticidad: form.criticidad,
+      responsable: form.responsable, equipo: form.equipo, tipo: form.tipo,
       justificacion: form.justificacion || "Sin justificación registrada", prioridad: form.prioridad,
       estado: form.estado, valorUnitario: Number(form.valorUnitario), cantidad: Number(form.cantidad) || 1,
       total: Number(form.valorUnitario) * (Number(form.cantidad) || 1), observaciones: form.observaciones,
@@ -311,7 +302,7 @@ export default function App() {
       if (rec) {
         setForm({
           id: rec.id, fecha: rec.fecha, fechaEntrega: rec.fechaEntrega || "", area: rec.area, servicio: rec.servicio, responsable: rec.responsable,
-          equipo: rec.equipo, tipo: rec.tipo, criticidad: rec.criticidad || rec.prioridad || "Media", justificacion: rec.justificacion, prioridad: rec.prioridad,
+          equipo: rec.equipo, tipo: rec.tipo, justificacion: rec.justificacion, prioridad: rec.prioridad,
           estado: rec.estado, valorUnitario: String(rec.valorUnitario), cantidad: String(rec.cantidad),
           observaciones: rec.observaciones || "",
         });
@@ -399,7 +390,6 @@ export default function App() {
       xml += `    <responsable>${escapeXML(r.responsable)}</responsable>\n`;
       xml += `    <equipo>${escapeXML(r.equipo)}</equipo>\n`;
       xml += `    <tipo>${escapeXML(r.tipo)}</tipo>\n`;
-      xml += `    <criticidad>${escapeXML(r.criticidad || r.prioridad)}</criticidad>\n`;
       xml += `    <prioridad>${escapeXML(r.prioridad)}</prioridad>\n`;
       xml += `    <estado>${escapeXML(r.estado)}</estado>\n`;
       xml += `    <valor_unitario>${escapeXML(r.valorUnitario)}</valor_unitario>\n`;
@@ -490,6 +480,8 @@ export default function App() {
       };
     });
     arr.sort((a, b) => areaChartMode === "inversion" ? b.inversion - a.inversion : b.n - a.n);
+    // Asignamos el color unificado dinámico
+    arr.forEach((item, i) => { item.fill = CHART_PALETTE[i % CHART_PALETTE.length]; });
     return arr;
   }, [filtered, areas, areaChartMode]);
 
@@ -500,9 +492,9 @@ export default function App() {
         estado: e, n: f.length,
         equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
         inversion: f.reduce((s, r) => s + r.total, 0),
+        fill: STATUS_STYLE[e].dot // Color semántico respetado
       };
     });
-    // Se organiza el gráfico de dona basado en el modo seleccionado
     arr.sort((a, b) => estadoChartMode === "inversion" ? b.inversion - a.inversion : b.n - a.n);
     return arr;
   }, [filtered, estadoChartMode]);
@@ -513,6 +505,7 @@ export default function App() {
       tipo: t, n: f.length,
       equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
       inversion: f.reduce((s, r) => s + r.total, 0),
+      fill: TIPO_STYLE[t].chart // Color semántico respetado
     };
   }), [filtered]);
 
@@ -522,15 +515,18 @@ export default function App() {
       prioridad: p, n: f.length,
       equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
       inversion: f.reduce((s, r) => s + r.total, 0),
+      fill: PRIORITY_STYLE[p].chart // Color semántico respetado
     };
   }), [filtered]);
 
-  // Nuevo gráfico: Top 5 Equipos de mayor inversión
   const top5Equipos = useMemo(() => {
     return [...filtered]
       .sort((a, b) => b.total - a.total)
       .slice(0, 5)
-      .map(r => ({ equipo: r.equipo, n: 1, equipos: r.cantidad, inversion: r.total, id: r.id }));
+      .map((r, i) => ({ 
+        equipo: r.equipo, n: 1, equipos: r.cantidad, inversion: r.total, id: r.id, 
+        fill: CHART_PALETTE[i % CHART_PALETTE.length] // Color unificado dinámico
+      }));
   }, [filtered]);
 
   const byResponsable = useMemo(() => responsables.map((p) => ({
@@ -602,6 +598,8 @@ export default function App() {
         @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(18,165,148,0.5);} 70% { box-shadow:0 0 0 6px rgba(18,165,148,0);} 100% { box-shadow:0 0 0 0 rgba(18,165,148,0);} }
         ::-webkit-scrollbar { height:8px; width:8px; }
         ::-webkit-scrollbar-thumb { background:#CBD5DB; border-radius:8px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* SIDEBAR */}
@@ -679,11 +677,12 @@ export default function App() {
               })}
             </div>
 
-            {/* FILTERS */}
-            <div className="card" style={{ padding: "14px 18px", marginBottom: 18, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+            {/* FILTERS (SINGLE ROW) */}
+            <div className="card hide-scroll" style={{ padding: "10px 16px", marginBottom: 18, display: "flex", alignItems: "center", gap: 14, flexWrap: "nowrap", overflowX: "auto", whiteSpace: "nowrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: SLATE, fontSize: 12.5, fontWeight: 600 }}>
                 <SlidersHorizontal size={14} /> Filtros
               </div>
+              
               {[
                 { key: "area", label: "Área", opts: areas },
                 { key: "estado", label: "Estado", opts: ESTADOS },
@@ -698,6 +697,7 @@ export default function App() {
                   </select>
                 </div>
               ))}
+              
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 12, color: SLATE_LIGHT }}>Valor de compra</span>
                 <select className="sel" value={filters.valorRango} onChange={(e) => setFilters((s) => ({ ...s, valorRango: e.target.value }))}>
@@ -707,17 +707,77 @@ export default function App() {
                   <option value="alto">Alto (más de $2,000)</option>
                 </select>
               </div>
-              {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos" || filters.valorRango !== "Todos") && (
-                <button className="btn-ghost" onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
-                  <X size={13} /> Limpiar
+              
+              {/* ACCIONES */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", paddingLeft: 10 }}>
+                {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos" || filters.valorRango !== "Todos") && (
+                  <button className="btn-ghost" onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
+                    <X size={13} /> Limpiar
+                  </button>
+                )}
+                
+                <button 
+                  className="btn-ghost" 
+                  onClick={() => setShowFilteredList(!showFilteredList)}
+                  style={{ background: showFilteredList ? "#EAF6F4" : "transparent", color: showFilteredList ? TEAL_DARK : SLATE, border: showFilteredList ? `1px solid #CFEDE7` : `1px solid ${BORDER}` }}
+                >
+                  {showFilteredList ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  {showFilteredList ? "Ocultar solicitudes" : "Mostrar solicitudes"}
                 </button>
-              )}
+              </div>
             </div>
+
+            {/* TABLA DE SOLICITUDES FILTRADAS */}
+            {showFilteredList && (
+              <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
+                {filtered.length === 0 ? (
+                  <div style={{ padding: "20px", textAlign: "center", color: SLATE_LIGHT, fontSize: 13 }}>
+                    No hay solicitudes que coincidan con los filtros actuales.
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+                      <thead>
+                        <tr style={{ background: "#FAFBFC" }}>
+                          <th className="th">ID</th>
+                          <th className="th">Área</th>
+                          <th className="th">Equipo Médico</th>
+                          <th className="th">Tipo</th>
+                          <th className="th">Prioridad</th>
+                          <th className="th">Estado</th>
+                          <th className="th">Cant.</th>
+                          <th className="th">Inversión</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map(r => (
+                          <tr key={r.id} className="datarow">
+                            <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
+                            <td className="td">{r.area}</td>
+                            <td className="td" style={{ maxWidth: 200, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={r.equipo}>{r.equipo}</td>
+                            <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
+                            <td className="td"><span className="badge" style={{ background: PRIORITY_STYLE[r.prioridad].bg, color: PRIORITY_STYLE[r.prioridad].text }}>{r.prioridad}</span></td>
+                            <td className="td">
+                              <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_STYLE[r.estado].dot }}></span>
+                                {r.estado}
+                              </span>
+                            </td>
+                            <td className="td mono">{r.cantidad}</td>
+                            <td className="td mono" style={{ fontWeight: 700 }}>{fmtUSD(r.total)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* CHARTS GRID */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               
-              {/* Áreas (con botones estéticos) */}
+              {/* Áreas */}
               <div className="card" style={{ padding: "16px 18px", gridColumn: "1 / -1" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                   <div className="disp" style={{ fontSize: 14.5, fontWeight: 700 }}>Adquisiciones por Área</div>
@@ -736,12 +796,16 @@ export default function App() {
                     <XAxis dataKey="area" tick={{ fontSize: 10, fill: SLATE }} interval={0} angle={-20} textAnchor="end" height={60} />
                     <YAxis tickFormatter={areaChartMode === "inversion" ? fmtUSDk : (v)=>v} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
                     <Tooltip content={<SharedTooltip titlePrefix="Área" />} cursor={{fill: '#F3F6F7'}} />
-                    <Bar dataKey={areaChartMode === "inversion" ? "inversion" : "n"} fill={INK} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey={areaChartMode === "inversion" ? "inversion" : "n"} radius={[4, 4, 0, 0]}>
+                      {byArea.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Estados (Ahora con pestañas) */}
+              {/* Estados */}
               <div className="card" style={{ padding: "16px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div className="disp" style={{ fontSize: 13.5, fontWeight: 700 }}>Distribución por estado</div>
@@ -762,7 +826,7 @@ export default function App() {
                       nameKey="estado" 
                       cx="50%" cy="50%" innerRadius={54} outerRadius={90} paddingAngle={2}
                     >
-                      {byEstado.map((e, i) => <Cell key={i} fill={STATUS_STYLE[e.estado].dot} />)}
+                      {byEstado.map((e, i) => <Cell key={i} fill={e.fill} />)}
                     </Pie>
                     <Tooltip content={<SharedTooltip titlePrefix="Estado" />} />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: 11.5 }} />
@@ -780,7 +844,7 @@ export default function App() {
                     <YAxis type="category" dataKey="tipo" width={90} tick={{ fontSize: 11, fill: SLATE }} />
                     <Tooltip content={<SharedTooltip titlePrefix="Tipo" />} cursor={{fill: '#F3F6F7'}} />
                     <Bar dataKey="inversion" radius={[0, 4, 4, 0]}>
-                      {byTipo.map((e, i) => <Cell key={i} fill={TIPO_STYLE[e.tipo].chart} />)}
+                      {byTipo.map((e, i) => <Cell key={i} fill={e.fill} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -796,13 +860,13 @@ export default function App() {
                     <YAxis tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
                     <Tooltip content={<SharedTooltip titlePrefix="Prioridad" />} cursor={{fill: '#F3F6F7'}} />
                     <Bar dataKey="inversion" radius={[4, 4, 0, 0]}>
-                      {byPrioridad.map((e, i) => <Cell key={i} fill={PRIORITY_STYLE[e.prioridad].chart} />)}
+                      {byPrioridad.map((e, i) => <Cell key={i} fill={e.fill} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Top 5 Equipos (Nuevo) */}
+              {/* Top 5 Equipos */}
               <div className="card" style={{ padding: "16px 18px" }}>
                 <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Top 5 Equipos (Mayor Inversión)</div>
                 <ResponsiveContainer width="100%" height={260}>
@@ -811,7 +875,11 @@ export default function App() {
                     <XAxis type="number" tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
                     <YAxis type="category" dataKey="equipo" width={110} tick={{ fontSize: 10, fill: SLATE }} />
                     <Tooltip content={<SharedTooltip titlePrefix="Equipo" />} cursor={{fill: '#F3F6F7'}} />
-                    <Bar dataKey="inversion" fill={VIOLET} radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="inversion" radius={[0, 4, 4, 0]}>
+                      {top5Equipos.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -873,7 +941,6 @@ export default function App() {
                       <th className="th">Responsable</th>
                       <th className="th">Equipo Médico</th>
                       <th className="th">Tipo</th>
-                      <th className="th"><button type="button" className="sortbtn" onClick={() => toggleSort("criticidad")}>Criticidad {sortIcon("criticidad")}</button></th>
                       <th className="th">Prioridad</th>
                       <th className="th">Estado</th>
                       <th className="th"><button type="button" className="sortbtn" onClick={() => toggleSort("valorUnitario")}>V. Unitario {sortIcon("valorUnitario")}</button></th>
@@ -886,7 +953,6 @@ export default function App() {
                   </thead>
                   <tbody>
                     {dbFiltered.map((r) => {
-                      const critStyle = CRITICIDAD_STYLE[r.criticidad || r.prioridad] || CRITICIDAD_STYLE["Media"];
                       return (
                       <tr key={r.id} className="datarow">
                         <td className="td mono" style={{ fontSize: 11.5, color: SLATE }}>{r.id}</td>
@@ -897,7 +963,6 @@ export default function App() {
                         <td className="td">{r.responsable}</td>
                         <td className="td" style={{ maxWidth: 200 }}>{r.equipo}</td>
                         <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
-                        <td className="td"><span className="badge" style={{ background: critStyle.bg, color: critStyle.text }}>{r.criticidad || r.prioridad}</span></td>
                         <td className="td"><span className="badge" style={{ background: PRIORITY_STYLE[r.prioridad].bg, color: PRIORITY_STYLE[r.prioridad].text }}>{r.prioridad}</span></td>
                         <td className="td">
                           <span className="badge" style={{ background: STATUS_STYLE[r.estado].bg, color: STATUS_STYLE[r.estado].text }}>
@@ -1291,12 +1356,6 @@ export default function App() {
                   <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Tipo de adquisición</label>
                   <select className="sel" style={{ width: "100%" }} value={form.tipo} onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value }))}>
                     {TIPOS.map((t) => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 11.5, color: SLATE_LIGHT, fontWeight: 600 }}>Criticidad</label>
-                  <select className="sel" style={{ width: "100%" }} value={form.criticidad} onChange={(e) => setForm((f) => ({ ...f, criticidad: e.target.value }))}>
-                    {CRITICIDADES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
