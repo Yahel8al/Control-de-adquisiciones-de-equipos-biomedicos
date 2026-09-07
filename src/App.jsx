@@ -596,10 +596,27 @@ export default function App() {
         @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(18,165,148,0.5);} 70% { box-shadow:0 0 0 6px rgba(18,165,148,0);} 100% { box-shadow:0 0 0 0 rgba(18,165,148,0);} }
         ::-webkit-scrollbar { height:8px; width:8px; }
         ::-webkit-scrollbar-thumb { background:#CBD5DB; border-radius:8px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Tooltip de KPIs */
+        .kpi-card { position: relative; transition: transform 0.2s ease; }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .kpi-tooltip { 
+          visibility: hidden; opacity: 0; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); 
+          background: #0B2A3D; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 12px; 
+          z-index: 100; white-space: nowrap; transition: all 0.2s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+          pointer-events: none; border: 1px solid #123B52; display: flex; flex-direction: column; gap: 8px;
+        }
+        .kpi-tooltip::after {
+          content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; 
+          border-style: solid; border-color: #0B2A3D transparent transparent transparent;
+        }
+        .kpi-card:hover .kpi-tooltip { visibility: visible; opacity: 1; bottom: 105%; }
       `}</style>
 
-      {/* SIDEBAR */}
-      <aside style={{ width: 216, background: INK, minHeight: "100vh", padding: "22px 12px", position: "sticky", top: 0, flexShrink: 0 }}>
+      {/* SIDEBAR - Ahora con height: 100vh y overflowY: auto para que sea siempre sticky */}
+      <aside style={{ width: 216, background: INK, height: "100vh", padding: "22px 12px", position: "sticky", top: 0, flexShrink: 0, overflowY: "auto" }}>
         <div style={{ padding: "4px 10px 22px 10px" }}>
           <div className="disp" style={{ color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "0.01em" }}>INGENIERÍA CLÍNICA</div>
           <div style={{ color: "#7FA8B8", fontSize: 11, marginTop: 2 }}>Gestión de Adquisiciones</div>
@@ -658,11 +675,26 @@ export default function App() {
                 { label: "INVERSIÓN NUEVOS", value: kpis.invNuevos, fmt: fmtUSDk, icon: ClipboardCheck, accent: TEAL },
                 { label: "INVERSIÓN REPOSICIÓN", value: kpis.invRepo, fmt: fmtUSDk, icon: ArrowRightLeft, accent: AMBER },
                 { label: "PRESUPUESTO EJEC.", value: kpis.pctPresupuesto, fmt: fmtPct, icon: AlertTriangle,
-                  accent: kpis.pctPresupuesto > 1 ? CORAL : kpis.pctPresupuesto >= 0.8 ? AMBER : TEAL },
+                  accent: kpis.pctPresupuesto > 1 ? CORAL : kpis.pctPresupuesto >= 0.8 ? AMBER : TEAL,
+                  hasTooltip: true
+                },
               ].map((k, i) => {
                 const Icon = k.icon;
                 return (
-                  <div key={i} className="card" style={{ padding: "14px 16px", borderTop: "3px solid " + k.accent }}>
+                  <div key={i} className="card kpi-card" style={{ padding: "14px 16px", borderTop: "3px solid " + k.accent }}>
+                    {k.hasTooltip && (
+                      <div className="kpi-tooltip">
+                        <div style={{ color: SLATE_LIGHT, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.04em", marginBottom: 4, borderBottom: `1px solid ${INK_2}`, paddingBottom: 4 }}>DESGLOSE DE PRESUPUESTO</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, fontSize: 12.5 }}>
+                          <span style={{ color: '#AEC3D1' }}>Presupuesto Asignado:</span>
+                          <b style={{ color: TEAL }}>{fmtUSD(kpis.presTotal)}</b>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, fontSize: 12.5 }}>
+                          <span style={{ color: '#AEC3D1' }}>Presupuesto Ejecutado:</span>
+                          <b style={{ color: AMBER }}>{fmtUSD(kpis.ejecTotal)}</b>
+                        </div>
+                      </div>
+                    )}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                       <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.04em", color: SLATE_LIGHT }}>{k.label}</span>
                       <Icon size={14} color={k.accent} />
@@ -673,14 +705,14 @@ export default function App() {
               })}
             </div>
 
-            {/* FILTERS (TRES FILAS PERFECTAMENTE ESTRUCTURADAS) */}
+            {/* FILTERS */}
             <div className="card" style={{ padding: "14px 18px", marginBottom: 18 }}>
               {/* FILA 1: Título */}
               <div style={{ display: "flex", alignItems: "center", gap: 6, color: SLATE, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>
                 <SlidersHorizontal size={15} /> Filtros
               </div>
 
-              {/* FILA 2: Controles (Sin scroll horizontal, usando flex: 1) */}
+              {/* FILA 2: Controles */}
               <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
                 {[
                   { key: "area", label: "Área", opts: areas },
@@ -707,7 +739,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* FILA 3: Botones (Alineados a la derecha y más pequeños) */}
+              {/* FILA 3: Botones */}
               <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 12 }}>
                 {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos" || filters.valorRango !== "Todos") && (
                   <button className="btn-ghost" style={{ fontSize: 11.5, padding: "4px 10px", minHeight: 28 }} onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
@@ -731,7 +763,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* TABLA DE SOLICITUDES FILTRADAS (Visible si el botón se presiona, debajo a la derecha del dashboard flow) */}
+            {/* TABLA DE SOLICITUDES FILTRADAS */}
             {showFilteredList && (
               <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
                 {filtered.length === 0 ? (
