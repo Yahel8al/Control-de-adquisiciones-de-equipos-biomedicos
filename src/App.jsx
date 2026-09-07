@@ -130,14 +130,40 @@ const escapeXML = (str) => {
   });
 };
 
+// Componente para los botones estilo "Tabs"
+const TabButton = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    type="button"
+    style={{
+      background: active ? '#ffffff' : 'transparent',
+      color: active ? INK : SLATE_LIGHT,
+      boxShadow: active ? '0 2px 5px rgba(0,0,0,0.06)' : 'none',
+      border: 'none',
+      borderRadius: 6,
+      padding: '5px 14px',
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+    }}
+  >
+    {children}
+  </button>
+);
+
+// Tooltip Unificado con colores dinámicos
 const SharedTooltip = ({ active, payload, label, titlePrefix }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const categoryName = data.name || data.estado || data.tipo || data.prioridad || data.criticidad || data.area || label;
+    // Extraemos el color directamente de Recharts para que coincida con la barra/porción
+    const color = payload[0].fill || INK; 
+    const categoryName = data.name || data.estado || data.tipo || data.prioridad || data.criticidad || data.area || data.equipo || label;
+    
     return (
       <div style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "12px 16px", borderRadius: 8, boxShadow: "0 4px 14px rgba(0,0,0,0.08)", minWidth: 200 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: INK, marginBottom: 10, borderBottom: `1px solid ${BORDER}`, paddingBottom: 6 }}>
-          {titlePrefix}: {categoryName}
+        <div style={{ fontSize: 13, fontWeight: 700, color: color, marginBottom: 10, borderBottom: `1px solid ${BORDER}`, paddingBottom: 6 }}>
+          {titlePrefix}: <span style={{color: color}}>{categoryName}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: SLATE, marginBottom: 4 }}>
           <span>Solicitudes:</span> <b style={{color: INK}}>{data.n || 0}</b>
@@ -175,7 +201,10 @@ export default function App() {
   const [authModal, setAuthModal] = useState(null); 
   const [authPass, setAuthPass] = useState("");
   const [authError, setAuthError] = useState("");
+  
+  // Controles de gráficos
   const [areaChartMode, setAreaChartMode] = useState("inversion");
+  const [estadoChartMode, setEstadoChartMode] = useState("inversion");
 
   const emptyForm = {
     id: "", fecha: new Date().toISOString().slice(0, 10), fechaEntrega: "", area: areas[0] || "", servicio: "", responsable: responsables[0] || "",
@@ -464,14 +493,19 @@ export default function App() {
     return arr;
   }, [filtered, areas, areaChartMode]);
 
-  const byEstado = useMemo(() => ESTADOS.map((e) => {
-    const f = filtered.filter((r) => r.estado === e);
-    return {
-      estado: e, n: f.length,
-      equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
-      inversion: f.reduce((s, r) => s + r.total, 0),
-    };
-  }), [filtered]);
+  const byEstado = useMemo(() => {
+    let arr = ESTADOS.map((e) => {
+      const f = filtered.filter((r) => r.estado === e);
+      return {
+        estado: e, n: f.length,
+        equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
+        inversion: f.reduce((s, r) => s + r.total, 0),
+      };
+    });
+    // Se organiza el gráfico de dona basado en el modo seleccionado
+    arr.sort((a, b) => estadoChartMode === "inversion" ? b.inversion - a.inversion : b.n - a.n);
+    return arr;
+  }, [filtered, estadoChartMode]);
 
   const byTipo = useMemo(() => TIPOS.map((t) => {
     const f = filtered.filter((r) => r.tipo === t);
@@ -491,14 +525,13 @@ export default function App() {
     };
   }), [filtered]);
 
-  const byCriticidad = useMemo(() => CRITICIDADES.map((c) => {
-    const f = filtered.filter((r) => (r.criticidad || r.prioridad) === c);
-    return {
-      criticidad: c, n: f.length,
-      equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
-      inversion: f.reduce((s, r) => s + r.total, 0),
-    };
-  }), [filtered]);
+  // Nuevo gráfico: Top 5 Equipos de mayor inversión
+  const top5Equipos = useMemo(() => {
+    return [...filtered]
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+      .map(r => ({ equipo: r.equipo, n: 1, equipos: r.cantidad, inversion: r.total, id: r.id }));
+  }, [filtered]);
 
   const byResponsable = useMemo(() => responsables.map((p) => ({
     responsable: p, n: data.filter((r) => r.responsable === p).length,
@@ -683,15 +716,18 @@ export default function App() {
 
             {/* CHARTS GRID */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {/* Áreas */}
+              
+              {/* Áreas (con botones estéticos) */}
               <div className="card" style={{ padding: "16px 18px", gridColumn: "1 / -1" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                   <div className="disp" style={{ fontSize: 14.5, fontWeight: 700 }}>Adquisiciones por Área</div>
-                  <div style={{ display: "flex", gap: 6, background: "#F3F6F7", padding: 4, borderRadius: 8 }}>
-                    <button className="btn-ghost" style={{ background: areaChartMode === "solicitudes" ? "#fff" : "transparent", border: areaChartMode === "solicitudes" ? `1px solid ${BORDER}` : "none" }}
-                      onClick={() => setAreaChartMode("solicitudes")}>Solicitudes</button>
-                    <button className="btn-ghost" style={{ background: areaChartMode === "inversion" ? "#fff" : "transparent", border: areaChartMode === "inversion" ? `1px solid ${BORDER}` : "none" }}
-                      onClick={() => setAreaChartMode("inversion")}>Valor / Inversión</button>
+                  <div style={{ display: "flex", gap: 4, background: "#F3F6F7", padding: 4, borderRadius: 8, border: `1px solid ${BORDER}` }}>
+                    <TabButton active={areaChartMode === "solicitudes"} onClick={() => setAreaChartMode("solicitudes")}>
+                      Solicitudes
+                    </TabButton>
+                    <TabButton active={areaChartMode === "inversion"} onClick={() => setAreaChartMode("inversion")}>
+                      Valor / Inversión
+                    </TabButton>
                   </div>
                 </div>
                 <ResponsiveContainer width="100%" height={280}>
@@ -705,12 +741,27 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Estados */}
+              {/* Estados (Ahora con pestañas) */}
               <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Distribución por estado</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div className="disp" style={{ fontSize: 13.5, fontWeight: 700 }}>Distribución por estado</div>
+                  <div style={{ display: "flex", gap: 4, background: "#F3F6F7", padding: 3, borderRadius: 8, border: `1px solid ${BORDER}` }}>
+                    <TabButton active={estadoChartMode === "solicitudes"} onClick={() => setEstadoChartMode("solicitudes")}>
+                      Solicitudes
+                    </TabButton>
+                    <TabButton active={estadoChartMode === "inversion"} onClick={() => setEstadoChartMode("inversion")}>
+                      Inversión
+                    </TabButton>
+                  </div>
+                </div>
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={byEstado} dataKey="inversion" nameKey="estado" cx="50%" cy="50%" innerRadius={54} outerRadius={90} paddingAngle={2}>
+                    <Pie 
+                      data={byEstado} 
+                      dataKey={estadoChartMode === "inversion" ? "inversion" : "n"} 
+                      nameKey="estado" 
+                      cx="50%" cy="50%" innerRadius={54} outerRadius={90} paddingAngle={2}
+                    >
                       {byEstado.map((e, i) => <Cell key={i} fill={STATUS_STYLE[e.estado].dot} />)}
                     </Pie>
                     <Tooltip content={<SharedTooltip titlePrefix="Estado" />} />
@@ -751,21 +802,40 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Criticidad */}
+              {/* Top 5 Equipos (Nuevo) */}
               <div className="card" style={{ padding: "16px 18px" }}>
-                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Adquisiciones por criticidad</div>
+                <div className="disp" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>Top 5 Equipos (Mayor Inversión)</div>
                 <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={byCriticidad} margin={{ top: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-                    <XAxis dataKey="criticidad" tick={{ fontSize: 11.5, fill: SLATE }} />
-                    <YAxis tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
-                    <Tooltip content={<SharedTooltip titlePrefix="Criticidad" />} cursor={{fill: '#F3F6F7'}} />
-                    <Bar dataKey="inversion" radius={[4, 4, 0, 0]}>
-                      {byCriticidad.map((e, i) => <Cell key={i} fill={CRITICIDAD_STYLE[e.criticidad].chart} />)}
-                    </Bar>
+                  <BarChart data={top5Equipos} layout="vertical" margin={{ left: -10, right: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
+                    <XAxis type="number" tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
+                    <YAxis type="category" dataKey="equipo" width={110} tick={{ fontSize: 10, fill: SLATE }} />
+                    <Tooltip content={<SharedTooltip titlePrefix="Equipo" />} cursor={{fill: '#F3F6F7'}} />
+                    <Bar dataKey="inversion" fill={VIOLET} radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* Presupuesto gigante abajo */}
+              <div className="card" style={{ padding: "20px 22px", gridColumn: "1 / -1", marginTop: 10 }}>
+                <div className="disp" style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Presupuesto Asignado vs. Inversión Ejecutada por Área</div>
+                <ResponsiveContainer width="100%" height={340}>
+                  <BarChart data={budgetByArea} margin={{ top: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
+                    <XAxis dataKey="area" tick={{ fontSize: 11, fill: SLATE }} interval={0} angle={-20} textAnchor="end" height={60} />
+                    <YAxis tickFormatter={fmtUSDk} tick={{ fontSize: 11, fill: SLATE_LIGHT }} />
+                    <Tooltip 
+                      formatter={(value, name) => [fmtUSD(value), name]}
+                      contentStyle={{ borderRadius: 8, fontSize: 13, border: `1px solid ${BORDER}`, boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
+                      cursor={{fill: '#F3F6F7'}}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12, marginTop: 10 }} />
+                    <Bar dataKey="presupuesto" name="Presupuesto Asignado" fill="#B9CBD6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ejecutado" name="Inversión Ejecutada" fill={TEAL} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
             </div>
           </div>
         )}
@@ -928,12 +998,246 @@ export default function App() {
 
         {tab === "pivots" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            {/* Same Pivots layout */}
+            <div className="card" style={{ padding: "16px 18px" }}>
+              <div className="disp" style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Pivote 1 · Solicitudes e inversión por área</div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>{["Área", "N°", "Inversión", "% del total"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+                <tbody>
+                  {byArea.map((r) => (
+                    <tr key={r.area} className="datarow">
+                      <td className="td">{r.area}</td>
+                      <td className="td mono">{r.n}</td>
+                      <td className="td mono">{fmtUSD(r.inversion)}</td>
+                      <td className="td mono">{fmtPct(kpis.invTotal ? r.inversion / kpis.invTotal : 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="card" style={{ padding: "16px 18px" }}>
+              <div className="disp" style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Pivote 2 · Solicitudes por estado</div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>{["Estado", "N°", "Inversión"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+                <tbody>
+                  {ESTADOS.map((e) => {
+                    const row = byEstado.find(x => x.estado === e);
+                    return (
+                      <tr key={e} className="datarow">
+                        <td className="td"><span className="badge" style={{ background: STATUS_STYLE[e].bg, color: STATUS_STYLE[e].text }}>{e}</span></td>
+                        <td className="td mono">{row?.n || 0}</td>
+                        <td className="td mono">{fmtUSD(row?.inversion || 0)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="card" style={{ padding: "16px 18px" }}>
+              <div className="disp" style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Pivote 3 · Solicitudes e inversión por responsable</div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>{["Responsable", "N°", "Inversión"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+                <tbody>
+                  {byResponsable.map((r) => (
+                    <tr key={r.responsable} className="datarow">
+                      <td className="td">{r.responsable}</td>
+                      <td className="td mono">{r.n}</td>
+                      <td className="td mono">{fmtUSD(r.inversion)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="card" style={{ padding: "16px 18px" }}>
+              <div className="disp" style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Pivote 4 · Nuevo vs. Reposición / por año</div>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14 }}>
+                <thead><tr>{["Tipo", "N°", "Inversión"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+                <tbody>
+                  {byTipo.map((r) => (
+                    <tr key={r.tipo} className="datarow">
+                      <td className="td"><span className="badge" style={{ background: TIPO_STYLE[r.tipo].bg, color: TIPO_STYLE[r.tipo].text }}>{r.tipo}</span></td>
+                      <td className="td mono">{r.n}</td>
+                      <td className="td mono">{fmtUSD(r.inversion)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr>{["Año", "N°", "Inversión"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+                <tbody>
+                  {byYear.map((r) => (
+                    <tr key={r.anio} className="datarow">
+                      <td className="td mono">{r.anio}</td>
+                      <td className="td mono">{r.n}</td>
+                      <td className="td mono">{fmtUSD(r.inversion)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="card" style={{ padding: "16px 18px", gridColumn: "1 / -1" }}>
+              <div className="disp" style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Pivote 5 · Matriz Área × Estado (N° de solicitudes)</div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
+                  <thead>
+                    <tr>
+                      <th className="th">Área</th>
+                      {ESTADOS.map((e) => <th key={e} className="th" style={{ textAlign: "center" }}>{e}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {areaEstadoMatrix.map((row) => (
+                      <tr key={row.area} className="datarow">
+                        <td className="td">{row.area}</td>
+                        {ESTADOS.map((e) => (
+                          <td key={e} className="td mono" style={{ textAlign: "center" }}>
+                            {row[e] > 0
+                              ? <span className="badge" style={{ background: STATUS_STYLE[e].bg, color: STATUS_STYLE[e].text }}>{row[e]}</span>
+                              : <span style={{ color: "#D8DFE4" }}>—</span>}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* ... Configuration and Guide tabs logic remains identical to requested constraints ... */}
-        
+        {tab === "config" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 900 }}>
+            <div className="card" style={{ padding: "18px 20px" }}>
+              <div className="disp" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Áreas del hospital</div>
+              <p style={{ fontSize: 12, color: SLATE_LIGHT, margin: "0 0 14px 0" }}>
+                Estas áreas aparecen en los filtros, el formulario de nueva solicitud y el presupuesto.
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                <input className="inp" placeholder="Ej. Neurología" value={newArea} onChange={(e) => setNewArea(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addArea(); } }} />
+                <button type="button" className="btn-primary" onClick={addArea}><Plus size={14} /> Agregar</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 360, overflowY: "auto" }}>
+                {areas.map((a) => {
+                  const enUso = data.some((r) => r.area === a);
+                  return (
+                    <div key={a} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#FAFBFC", borderRadius: 8, border: "1px solid " + BORDER }}>
+                      <span style={{ fontSize: 13, color: INK }}>{a}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {enUso && <span style={{ fontSize: 10.5, color: SLATE_LIGHT }}>en uso</span>}
+                        <button type="button" onClick={() => removeArea(a)} title={enUso ? "No se puede eliminar: en uso" : "Eliminar"}
+                          style={{ background: "none", border: "none", cursor: enUso ? "not-allowed" : "pointer", color: enUso ? "#D8DFE4" : CORAL }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: "18px 20px" }}>
+              <div className="disp" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Personal responsable</div>
+              <p style={{ fontSize: 12, color: SLATE_LIGHT, margin: "0 0 14px 0" }}>
+                Ingenieros / personal a cargo del seguimiento de cada solicitud.
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                <input className="inp" placeholder="Ej. Sofía Ramírez" value={newResp} onChange={(e) => setNewResp(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addResponsable(); } }} />
+                <button type="button" className="btn-primary" onClick={addResponsable}><Plus size={14} /> Agregar</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 360, overflowY: "auto" }}>
+                {responsables.map((p) => {
+                  const enUso = data.some((r) => r.responsable === p);
+                  return (
+                    <div key={p} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#FAFBFC", borderRadius: 8, border: "1px solid " + BORDER }}>
+                      <span style={{ fontSize: 13, color: INK }}>{p}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {enUso && <span style={{ fontSize: 10.5, color: SLATE_LIGHT }}>en uso</span>}
+                        <button type="button" onClick={() => removeResponsable(p)} title={enUso ? "No se puede eliminar: en uso" : "Eliminar"}
+                          style={{ background: "none", border: "none", cursor: enUso ? "not-allowed" : "pointer", color: enUso ? "#D8DFE4" : CORAL }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: "14px 18px", gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10, background: "#EAF6F4", border: "1px solid #CFEDE7" }}>
+              <Save size={16} color={TEAL_DARK} />
+              <span style={{ fontSize: 12.5, color: TEAL_DARK }}>
+                Todo se guarda automáticamente en este navegador. No necesitas hacer nada más para conservar los cambios.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {tab === "guide" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 1100 }}>
+            {[
+              { t: "1. Estructura del panel", icon: LayoutDashboard, items: [
+                "Dashboard: KPIs gerenciales, filtros interactivos y gráficos dinámicos.",
+                "Base de Datos: registro completo de solicitudes, editable en cualquier momento.",
+                "Presupuesto: presupuesto por área y año con ejecución automática.",
+                "Resumen y Pivotes: tablas cruzadas equivalentes a tablas dinámicas de Excel.",
+              ]},
+              { t: "2. Cómo agregar una solicitud", icon: Plus, items: [
+                "Haz clic en 'Nueva solicitud' desde el Dashboard o la Base de Datos.",
+                "Completa los campos: equipo, área, responsable, tipo, prioridad, estado y valores.",
+                "La inversión total se calcula automáticamente (valor unitario × cantidad).",
+                "Hay dos fechas: 'Fecha de solicitud' (cuándo se registró) y 'Fecha de entrega / actualización de estado' (cuándo se entregó el equipo o cambió su estado). Esta segunda es opcional.",
+                "Al guardar, todos los KPIs, gráficos y pivotes se actualizan al instante.",
+              ]},
+              { t: "3. Uso de filtros", icon: SlidersHorizontal, items: [
+                "En el Dashboard, filtra por Área, Estado, Responsable o Año.",
+                "El bloque de resultado filtrado muestra el número de solicitudes e inversión que cumplen los filtros.",
+                "Los KPIs superiores siempre reflejan el 100% de los datos como vista general.",
+              ]},
+              { t: "4. Semáforo de estados", icon: Activity, items: [
+                "Prioridad: rojo = Alta, amarillo = Media, verde = Baja.",
+                "Estado: color distinto para Pendiente, En Revisión, Aprobado, Rechazado y Adquirido.",
+                "Presupuesto: verde < 80%, amarillo 80–100%, rojo > 100% (sobre presupuesto).",
+              ]},
+              { t: "5. Editar el presupuesto", icon: Wallet, items: [
+                "En la pestaña Presupuesto, edita directamente el valor asignado por área y año.",
+                "La inversión ejecutada se calcula sumando solicitudes en estado Aprobado o Adquirido.",
+              ]},
+              { t: "6. Recomendaciones de gestión", icon: CheckCircle2, items: [
+                "Revisa semanalmente las solicitudes en Pendiente y En Revisión.",
+                "Prioriza solicitudes de prioridad Alta ligadas a seguridad del paciente.",
+                "Usa el gráfico de Presupuesto vs. Ejecutado para anticipar áreas en riesgo.",
+              ]},
+              { t: "7. Áreas, personal y respaldo de datos", icon: Settings, items: [
+                "En la pestaña Configuración puedes agregar o quitar Áreas y Personal responsable.",
+                "No se puede eliminar un área o responsable que ya tenga solicitudes asignadas.",
+                "Si Firebase está configurado, todos los cambios se sincronizan en tiempo real para todo el equipo.",
+                "Si Firebase no está configurado, los datos se guardan solo en este navegador (modo local), como respaldo automático.",
+              ]},
+            ].map((sec, i) => {
+              const Icon = sec.icon;
+              return (
+                <div key={i} className="card" style={{ padding: "18px 20px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: "#EAF6F4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Icon size={15} color={TEAL_DARK} />
+                    </div>
+                    <div className="disp" style={{ fontSize: 14, fontWeight: 700, color: INK }}>{sec.t}</div>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {sec.items.map((it, j) => (
+                      <li key={j} style={{ fontSize: 13, color: SLATE, lineHeight: 1.7 }}>{it}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
         </>
         )}
       </main>
