@@ -62,7 +62,7 @@ const BORDER = "#E2E8ED";
 const BG = "#F3F6F7";
 const CARD = "#FFFFFF";
 
-// Paleta general para gráficos que no tienen un color semántico estricto
+// Paleta general para gráficos
 const CHART_PALETTE = [TEAL, INK_2, VIOLET, "#3D8BD4", AMBER, CORAL, "#0B6E64", "#7C6AE0"];
 
 const STATUS_STYLE = {
@@ -145,7 +145,6 @@ const TabButton = ({ active, onClick, children }) => (
   </button>
 );
 
-// Tooltip Dinámico
 const SharedTooltip = ({ active, payload, label, titlePrefix }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -480,7 +479,6 @@ export default function App() {
       };
     });
     arr.sort((a, b) => areaChartMode === "inversion" ? b.inversion - a.inversion : b.n - a.n);
-    // Asignamos el color unificado dinámico
     arr.forEach((item, i) => { item.fill = CHART_PALETTE[i % CHART_PALETTE.length]; });
     return arr;
   }, [filtered, areas, areaChartMode]);
@@ -492,7 +490,7 @@ export default function App() {
         estado: e, n: f.length,
         equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
         inversion: f.reduce((s, r) => s + r.total, 0),
-        fill: STATUS_STYLE[e].dot // Color semántico respetado
+        fill: STATUS_STYLE[e].dot 
       };
     });
     arr.sort((a, b) => estadoChartMode === "inversion" ? b.inversion - a.inversion : b.n - a.n);
@@ -505,7 +503,7 @@ export default function App() {
       tipo: t, n: f.length,
       equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
       inversion: f.reduce((s, r) => s + r.total, 0),
-      fill: TIPO_STYLE[t].chart // Color semántico respetado
+      fill: TIPO_STYLE[t].chart 
     };
   }), [filtered]);
 
@@ -515,7 +513,7 @@ export default function App() {
       prioridad: p, n: f.length,
       equipos: f.reduce((s, r) => s + (r.cantidad || 1), 0),
       inversion: f.reduce((s, r) => s + r.total, 0),
-      fill: PRIORITY_STYLE[p].chart // Color semántico respetado
+      fill: PRIORITY_STYLE[p].chart 
     };
   }), [filtered]);
 
@@ -525,7 +523,7 @@ export default function App() {
       .slice(0, 5)
       .map((r, i) => ({ 
         equipo: r.equipo, n: 1, equipos: r.cantidad, inversion: r.total, id: r.id, 
-        fill: CHART_PALETTE[i % CHART_PALETTE.length] // Color unificado dinámico
+        fill: CHART_PALETTE[i % CHART_PALETTE.length] 
       }));
   }, [filtered]);
 
@@ -598,8 +596,6 @@ export default function App() {
         @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(18,165,148,0.5);} 70% { box-shadow:0 0 0 6px rgba(18,165,148,0);} 100% { box-shadow:0 0 0 0 rgba(18,165,148,0);} }
         ::-webkit-scrollbar { height:8px; width:8px; }
         ::-webkit-scrollbar-thumb { background:#CBD5DB; border-radius:8px; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* SIDEBAR */}
@@ -677,57 +673,65 @@ export default function App() {
               })}
             </div>
 
-            {/* FILTERS (SINGLE ROW) */}
-            <div className="card hide-scroll" style={{ padding: "10px 16px", marginBottom: 18, display: "flex", alignItems: "center", gap: 14, flexWrap: "nowrap", overflowX: "auto", whiteSpace: "nowrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, color: SLATE, fontSize: 12.5, fontWeight: 600 }}>
-                <SlidersHorizontal size={14} /> Filtros
+            {/* FILTERS (TRES FILAS PERFECTAMENTE ESTRUCTURADAS) */}
+            <div className="card" style={{ padding: "14px 18px", marginBottom: 18 }}>
+              {/* FILA 1: Título */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: SLATE, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>
+                <SlidersHorizontal size={15} /> Filtros
               </div>
-              
-              {[
-                { key: "area", label: "Área", opts: areas },
-                { key: "estado", label: "Estado", opts: ESTADOS },
-                { key: "responsable", label: "Responsable", opts: responsables },
-                { key: "anio", label: "Año", opts: YEARS },
-              ].map((f) => (
-                <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 12, color: SLATE_LIGHT }}>{f.label}</span>
-                  <select className="sel" value={filters[f.key]} onChange={(e) => setFilters((s) => ({ ...s, [f.key]: e.target.value }))}>
-                    <option>Todos</option>
-                    {f.opts.map((o) => <option key={o} value={o}>{o}</option>)}
+
+              {/* FILA 2: Controles (Sin scroll horizontal, usando flex: 1) */}
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
+                {[
+                  { key: "area", label: "Área", opts: areas },
+                  { key: "estado", label: "Estado", opts: ESTADOS },
+                  { key: "responsable", label: "Responsable", opts: responsables },
+                  { key: "anio", label: "Año", opts: YEARS },
+                ].map((f) => (
+                  <div key={f.key} style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 11, color: SLATE_LIGHT, marginBottom: 4, fontWeight: 500 }}>{f.label}</div>
+                    <select className="sel" style={{ width: "100%", textOverflow: "ellipsis" }} value={filters[f.key]} onChange={(e) => setFilters((s) => ({ ...s, [f.key]: e.target.value }))}>
+                      <option>Todos</option>
+                      {f.opts.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+                ))}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: SLATE_LIGHT, marginBottom: 4, fontWeight: 500 }}>Valor de compra</div>
+                  <select className="sel" style={{ width: "100%", textOverflow: "ellipsis" }} value={filters.valorRango} onChange={(e) => setFilters((s) => ({ ...s, valorRango: e.target.value }))}>
+                    <option value="Todos">Todos</option>
+                    <option value="bajo">Bajo ($0 – $400)</option>
+                    <option value="medio">Medio ($400 – $2,000)</option>
+                    <option value="alto">Alto (más de $2,000)</option>
                   </select>
                 </div>
-              ))}
-              
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, color: SLATE_LIGHT }}>Valor de compra</span>
-                <select className="sel" value={filters.valorRango} onChange={(e) => setFilters((s) => ({ ...s, valorRango: e.target.value }))}>
-                  <option value="Todos">Todos</option>
-                  <option value="bajo">Bajo ($0 – $400)</option>
-                  <option value="medio">Medio ($400 – $2,000)</option>
-                  <option value="alto">Alto (más de $2,000)</option>
-                </select>
               </div>
-              
-              {/* ACCIONES */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", paddingLeft: 10 }}>
+
+              {/* FILA 3: Botones (Alineados a la derecha y más pequeños) */}
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 12 }}>
                 {(filters.area !== "Todos" || filters.estado !== "Todos" || filters.responsable !== "Todos" || filters.anio !== "Todos" || filters.valorRango !== "Todos") && (
-                  <button className="btn-ghost" onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
-                    <X size={13} /> Limpiar
+                  <button className="btn-ghost" style={{ fontSize: 11.5, padding: "4px 10px", minHeight: 28 }} onClick={() => setFilters({ area: "Todos", estado: "Todos", responsable: "Todos", anio: "Todos", valorRango: "Todos" })}>
+                    <X size={12} /> Limpiar
                   </button>
                 )}
                 
                 <button 
                   className="btn-ghost" 
                   onClick={() => setShowFilteredList(!showFilteredList)}
-                  style={{ background: showFilteredList ? "#EAF6F4" : "transparent", color: showFilteredList ? TEAL_DARK : SLATE, border: showFilteredList ? `1px solid #CFEDE7` : `1px solid ${BORDER}` }}
+                  style={{ 
+                    fontSize: 11.5, padding: "4px 10px", minHeight: 28,
+                    background: showFilteredList ? "#EAF6F4" : "transparent", 
+                    color: showFilteredList ? TEAL_DARK : SLATE, 
+                    border: showFilteredList ? `1px solid #CFEDE7` : `1px solid ${BORDER}` 
+                  }}
                 >
-                  {showFilteredList ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  {showFilteredList ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                   {showFilteredList ? "Ocultar solicitudes" : "Mostrar solicitudes"}
                 </button>
               </div>
             </div>
 
-            {/* TABLA DE SOLICITUDES FILTRADAS */}
+            {/* TABLA DE SOLICITUDES FILTRADAS (Visible si el botón se presiona, debajo a la derecha del dashboard flow) */}
             {showFilteredList && (
               <div className="card" style={{ marginBottom: 18, overflow: "hidden" }}>
                 {filtered.length === 0 ? (
