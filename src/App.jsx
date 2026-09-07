@@ -683,14 +683,21 @@ export default function App() {
                 return (
                   <div key={i} className="card kpi-card" style={{ padding: "14px 16px", borderTop: "3px solid " + k.accent }}>
                     {k.hasTooltip && (
-                      <div className="kpi-tooltip">
-                        <div style={{ color: SLATE_LIGHT, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.04em", marginBottom: 4, borderBottom: `1px solid ${INK_2}`, paddingBottom: 4 }}>DESGLOSE DE PRESUPUESTO</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, fontSize: 12.5 }}>
-                          <span style={{ color: '#AEC3D1' }}>Presupuesto Asignado:</span>
-                          <b style={{ color: TEAL }}>{fmtUSD(kpis.presTotal)}</b>
+                      <div className="kpi-tooltip" style={{ 
+                        background: "#ffffff", 
+                        border: `1px solid ${TEAL}`, 
+                        padding: "10px 12px", /* Cuadro más pequeño */
+                        boxShadow: "0 4px 12px rgba(18,165,148,0.15)" /* Sombra sutil verde */
+                      }}>
+                        <div style={{ color: TEAL_DARK, fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", marginBottom: 6, borderBottom: `1px solid ${BORDER}`, paddingBottom: 4 }}>
+                          DESGLOSE DE PRESUPUESTO
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, fontSize: 12.5 }}>
-                          <span style={{ color: '#AEC3D1' }}>Presupuesto Ejecutado:</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 11.5 }}>
+                          <span style={{ color: SLATE }}>Asignado:</span>
+                          <b style={{ color: INK }}>{fmtUSD(kpis.presTotal)}</b>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 11.5, marginTop: 4 }}>
+                          <span style={{ color: SLATE }}>Ejecutado:</span>
                           <b style={{ color: AMBER }}>{fmtUSD(kpis.ejecTotal)}</b>
                         </div>
                       </div>
